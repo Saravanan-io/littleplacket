@@ -1,0 +1,15 @@
+{
+  "name": "kiddy-closet",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "AdminPanel",
+    "Frontend"
+  ],
+  "scripts": {
+    "dev:frontend": "cd Frontend && npm run dev",
+    "dev:admin": "cd AdminPanel && npm run dev",
+    "build:frontend": "cd Frontend && npm run build",
+    "build:admin": "cd AdminPanel && npm run build"
+  }
+}
