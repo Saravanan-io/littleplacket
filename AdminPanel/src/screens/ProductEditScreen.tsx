@@ -8,26 +8,53 @@ import {
   TextInput,
   ActivityIndicator,
   Image,
+  useWindowDimensions,
 } from 'react-native';
+import {
+  Camera,
+  UploadCloud,
+  Trash2,
+  Baby,
+  Heart,
+} from 'lucide-react';
 import { api } from '../services/api';
-import { AgeOption, Collection, Product, ScreenName, AgePriceEntry } from '../types';
+import { Product, ScreenName } from '../types';
+import { compressAndValidateImage } from '../utils/imageCompressor';
+import { deleteFromFirebaseStorage } from '../services/firebaseService';
 
 interface ProductEditScreenProps {
   productId?: string;
   onNavigate: (screen: ScreenName) => void;
 }
 
+
 const SLOT_CONFIG = [
-  { title: 'Slot 1: Cover Photo', desc: 'Main catalogue thumbnail' },
-  { title: 'Slot 2: Angle 2', desc: 'Front or side view' },
-  { title: 'Slot 3: Angle 3', desc: 'Back or fabric close-up' },
-  { title: 'Slot 4: Angle 4', desc: 'Model or styled look' },
+  { title: 'Slot 1: Cover Photo', desc: 'Main card image in catalogue' },
+  { title: 'Slot 2: Angle 2', desc: 'Carousel angle 2 on product page' },
+  { title: 'Slot 3: Angle 3', desc: 'Carousel angle 3 on product page' },
+  { title: 'Slot 4: Angle 4', desc: 'Carousel angle 4 on product page' },
+];
+
+export const STANDARD_AGES = [
+  '2-3yr',
+  '3-4yr',
+  '4-5yr',
+  '5-6yr',
+  '6-7yr',
+  '7-8yr',
+  '8-9yr',
+  '9-10yr',
+  '10-11yr',
+  '11-12yr',
 ];
 
 export default function ProductEditScreen({
   productId,
   onNavigate,
 }: ProductEditScreenProps) {
+  const { width } = useWindowDimensions();
+  const isMobile = width < 768;
+
   const isEditing = Boolean(productId);
 
   const [loading, setLoading] = useState(false);
@@ -35,66 +62,42 @@ export default function ProductEditScreen({
   const [uploadingSlot, setUploadingSlot] = useState<number | null>(null);
   const activeSlotRef = useRef<number>(0);
 
-  // Form states
+  // Core Form states
   const [name, setName] = useState('');
   const [category, setCategory] = useState<'boys' | 'girls'>('boys');
-  const [dressType, setDressType] = useState('Romper');
-  const [collection, setCollection] = useState('');
-  const [description, setDescription] = useState('');
-  const [availability, setAvailability] = useState<'available' | 'limited' | 'out_of_stock' | 'coming_soon'>('available');
-  const [featured, setFeatured] = useState(false);
-  const [uniformPrice, setUniformPrice] = useState<string>('999');
+  const [price, setPrice] = useState<string>('749');
+  const [whatsappNumber, setWhatsappNumber] = useState<string>('');
+  const [selectedAges, setSelectedAges] = useState<string[]>([
+    '2-3yr',
+    '3-4yr',
+    '4-5yr',
+  ]);
+  const [availability, setAvailability] = useState<'available' | 'out_of_stock'>('available');
   const [images, setImages] = useState<Array<{ url: string; publicId?: string; order: number }>>([]);
-  const [agePrices, setAgePrices] = useState<AgePriceEntry[]>([]);
-
-  // Metadata dropdowns
-  const [availableAges, setAvailableAges] = useState<AgeOption[]>([]);
-  const [availableCollections, setAvailableCollections] = useState<Collection[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     const initData = async () => {
+      if (!productId) return;
       try {
         setLoading(true);
-        const [ages, cols] = await Promise.all([
-          api.getAges(),
-          api.getCollections(),
-        ]);
-        setAvailableAges(ages);
-        setAvailableCollections(cols);
-        if (cols.length > 0 && !collection) {
-          setCollection(cols[0].name);
-        }
+        const prod = await api.getProductById(productId);
+        setName(prod.name || '');
+        setCategory(prod.category || 'boys');
+        setPrice(String(prod.price || 749));
+        setWhatsappNumber(prod.whatsappNumber || '');
+        setAvailability(prod.availability === 'out_of_stock' ? 'out_of_stock' : 'available');
+        setImages(prod.images || []);
 
-        if (productId) {
-          const prod = await api.getProductById(productId);
-          setName(prod.name);
-          setCategory(prod.category);
-          setDressType(prod.dressType || '');
-          setCollection(prod.collection || '');
-          setDescription(prod.description || '');
-          setAvailability(prod.availability || 'available');
-          setFeatured(prod.featured || false);
-          setImages(prod.images || []);
-          setAgePrices(prod.agePrices || []);
-          const firstPrice = prod.agePrices?.[0]?.price || (prod as any).price || 999;
-          setUniformPrice(String(firstPrice));
-        } else {
-          // Preset default age price rows from available ages
-          const initialAgeRows: AgePriceEntry[] = ages.slice(0, 4).map((a) => ({
-            ageId: a.id,
-            ageLabel: a.label,
-            minMonths: a.minMonths,
-            maxMonths: a.maxMonths,
-            price: 999,
-            available: true,
-          }));
-          setAgePrices(initialAgeRows);
-          setUniformPrice('999');
+        if (prod.availableAges && prod.availableAges.length > 0) {
+          setSelectedAges(prod.availableAges);
+        } else if (prod.ageGroup) {
+          const matched = STANDARD_AGES.filter((a) => prod.ageGroup?.includes(a));
+          setSelectedAges(matched.length > 0 ? matched : ['2-3yr', '3-4yr']);
         }
       } catch (err) {
-        console.error('Failed to initialize product form:', err);
+        console.error('Failed to load product for editing:', err);
       } finally {
         setLoading(false);
       }
@@ -118,7 +121,12 @@ export default function ProductEditScreen({
     const targetSlot = activeSlotRef.current;
     try {
       setUploadingSlot(targetSlot);
-      const res = await api.uploadImage(file);
+
+      // 1. Validate Max File Size (10 MB) & Compress for storage optimization
+      const compResult = await compressAndValidateImage(file, 10, 1200, 0.82);
+
+      // 2. Upload compressed & optimized file
+      const res = await api.uploadImage(compResult.file);
       const newImages = [...images];
       const newEntry = {
         url: res.url,
@@ -136,86 +144,78 @@ export default function ProductEditScreen({
       }
       setImages(newImages.slice(0, 4));
     } catch (err: any) {
-      alert(`Image upload failed: ${err.message}`);
+      alert(`Image upload error: ${err.message}`);
     } finally {
       setUploadingSlot(null);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
-  const handleRemoveImage = (index: number) => {
-    const updated = images.filter((_, i) => i !== index);
-    setImages(updated);
-  };
-
-  const handlePasteUrlForSlot = (slotIdx: number) => {
-    const entered = window.prompt(`Enter direct image URL for Slot ${slotIdx + 1}:`, images[slotIdx]?.url || '');
-    if (entered && entered.trim()) {
-      const newImages = [...images];
-      const newEntry = {
-        url: entered.trim(),
-        order: slotIdx,
-      };
-      if (slotIdx < newImages.length) {
-        newImages[slotIdx] = newEntry;
-      } else {
-        newImages[slotIdx] = newEntry;
+  const handleRemoveImage = async (index: number) => {
+    const targetImg = images[index];
+    if (targetImg) {
+      const pathOrUrl = (targetImg as any).storagePath || targetImg.url || targetImg.publicId;
+      if (pathOrUrl) {
+        try {
+          await deleteFromFirebaseStorage(pathOrUrl);
+        } catch (e) {
+          console.warn('Firebase Storage image delete warning:', e);
+        }
       }
-      setImages(newImages.slice(0, 4));
     }
+    const newImages = images.filter((_, i) => i !== index);
+    setImages(newImages);
   };
 
-  const handleUniformPriceChange = (val: string) => {
-    setUniformPrice(val);
-    const num = Number(val) || 0;
-    setAgePrices(agePrices.map((ap) => ({ ...ap, price: num })));
-  };
 
-  const handleAddAgePriceRow = () => {
-    // Pick first unused age or fallback
-    const usedAgeIds = new Set(agePrices.map((ap) => ap.ageId));
-    const nextAge = availableAges.find((a) => !usedAgeIds.has(a.id)) || availableAges[0];
-    if (!nextAge) return;
-
-    setAgePrices([
-      ...agePrices,
-      {
-        ageId: nextAge.id,
-        ageLabel: nextAge.label,
-        minMonths: nextAge.minMonths,
-        maxMonths: nextAge.maxMonths,
-        price: Number(uniformPrice) || 0,
-        available: true,
-      },
-    ]);
-  };
-
-  const handleUpdateAgePrice = (index: number, key: keyof AgePriceEntry, value: any) => {
-    const updated = [...agePrices];
-    if (key === 'ageId') {
-      const selected = availableAges.find((a) => a.id === value);
-      if (selected) {
-        updated[index] = {
-          ...updated[index],
-          ageId: selected.id,
-          ageLabel: selected.label,
-          minMonths: selected.minMonths,
-          maxMonths: selected.maxMonths,
-        };
+  const toggleAge = (age: string) => {
+    if (selectedAges.includes(age)) {
+      if (selectedAges.length > 1) {
+        setSelectedAges(selectedAges.filter((a) => a !== age));
+      } else {
+        alert('Please keep at least one available age.');
       }
     } else {
-      (updated[index] as any)[key] = value;
+      setSelectedAges([...selectedAges, age]);
     }
-    setAgePrices(updated);
   };
 
-  const handleRemoveAgePrice = (index: number) => {
-    setAgePrices(agePrices.filter((_, i) => i !== index));
+  const handleDelete = async () => {
+    if (!productId) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to permanently delete "${name || 'this outfit'}" from the catalogue? This will immediately remove it from the user website.`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      await api.deleteProduct(productId);
+      alert('✓ Outfit successfully deleted from catalogue!');
+      onNavigate('products');
+    } catch (err: any) {
+      alert(`Delete failed: ${err.message}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleSave = async () => {
     if (!name.trim()) {
-      alert('Product name is required');
+      alert('Dress name is required');
+      return;
+    }
+
+    const numPrice = Number(price) || 0;
+    if (numPrice <= 0) {
+      alert('Please enter a valid price in ₹');
+      return;
+    }
+
+    if (images.length === 0 || !images[0]?.url) {
+      alert('Please provide at least 1 image (Slot 1: Cover Photo) for the outfit.');
       return;
     }
 
@@ -224,14 +224,18 @@ export default function ProductEditScreen({
       const payload: Partial<Product> = {
         name: name.trim(),
         category,
-        dressType,
-        collection,
-        description,
+        price: numPrice,
+        startingPrice: `₹${numPrice}`,
+        availableAges: selectedAges,
+        ageGroup: selectedAges[0] || '2-3yr',
+        whatsappNumber: whatsappNumber.trim() || undefined,
         availability,
-        featured,
         images,
-        agePrices,
+        description: '',
+        dressType: category === 'boys' ? 'Boys Outfit' : 'Girls Outfit',
+        collection: category === 'boys' ? 'Boys Collection' : 'Girls Collection',
       };
+
 
       if (isEditing && productId) {
         await api.updateProduct(productId, payload);
@@ -239,7 +243,11 @@ export default function ProductEditScreen({
         await api.createProduct(payload);
       }
 
-      alert(isEditing ? '✓ Outfit updated successfully! Changes are live on the user catalogue.' : '✓ Outfit created successfully!');
+      alert(
+        isEditing
+          ? '✓ Outfit updated successfully! Changes are live on the user frontend.'
+          : '✓ Outfit created successfully! Changes are live on the user frontend.'
+      );
       onNavigate('products');
     } catch (err: any) {
       alert(`Save failed: ${err.message}`);
@@ -258,18 +266,39 @@ export default function ProductEditScreen({
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Header */}
-      <View style={styles.header}>
+    <ScrollView style={styles.container} contentContainerStyle={[styles.content, isMobile && styles.contentMobile]}>
+      {/* Hidden browser file input for direct upload */}
+      {typeof document !== 'undefined' && (
+        <input
+          ref={fileInputRef as any}
+          type="file"
+          accept="image/*"
+          style={{ display: 'none' }}
+          onChange={handleImageUpload}
+        />
+      )}
+
+      {/* Top Header */}
+      <View style={[styles.header, isMobile && styles.headerMobile]}>
         <View>
           <Text style={styles.title}>
             {isEditing ? `Edit Outfit: ${name}` : 'Add New Baby Outfit'}
           </Text>
           <Text style={styles.subtitle}>
-            Enter details, upload catalogue photos, and specify age-based pricing tiers.
+            Add dress with 4 photos, dress name, available ages, price, and stock status.
           </Text>
         </View>
         <View style={styles.headerButtons}>
+          {isEditing && (
+            <TouchableOpacity
+              style={styles.deleteBtn}
+              onPress={handleDelete}
+              disabled={saving}
+            >
+              <Trash2 size={14} color="#DC2626" strokeWidth={2} />
+              <Text style={styles.deleteBtnText}>Delete Outfit</Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             style={styles.cancelBtn}
             onPress={() => onNavigate('products')}
@@ -285,330 +314,259 @@ export default function ProductEditScreen({
               <ActivityIndicator color="#fff" size="small" />
             ) : (
               <Text style={styles.saveBtnText}>
-                {isEditing ? 'Save Changes' : 'Create Outfit'}
+                {isEditing ? 'Save Changes' : 'Publish Outfit'}
               </Text>
             )}
           </TouchableOpacity>
         </View>
       </View>
 
-      {/* Main Form Cards */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Basic Information</Text>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Outfit Name *</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g. Teddy Bear Hooded Fleece Romper"
-            value={name}
-            onChangeText={setName}
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Catalogue Price (₹) * (Same for all sizes)</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="e.g. 1499"
-            keyboardType="numeric"
-            value={uniformPrice}
-            onChangeText={handleUniformPriceChange}
-          />
-        </View>
-
-        <View style={styles.rowTwo}>
-          <View style={[styles.inputGroup, { flex: 1 }]}>
-            <Text style={styles.label}>Category *</Text>
-            <View style={styles.pillSelector}>
-              <TouchableOpacity
-                style={[
-                  styles.pillOption,
-                  category === 'boys' && styles.pillOptionActive,
-                ]}
-                onPress={() => setCategory('boys')}
-              >
-                <Text
-                  style={[
-                    styles.pillOptionText,
-                    category === 'boys' && styles.pillOptionTextActive,
-                  ]}
-                >
-                  👦 Baby Boys
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.pillOption,
-                  category === 'girls' && styles.pillOptionActive,
-                ]}
-                onPress={() => setCategory('girls')}
-              >
-                <Text
-                  style={[
-                    styles.pillOptionText,
-                    category === 'girls' && styles.pillOptionTextActive,
-                  ]}
-                >
-                  👧 Baby Girls
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          <View style={[styles.inputGroup, { flex: 1 }]}>
-            <Text style={styles.label}>Dress Type *</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. Romper, Frock, Partywear, Linen Set"
-              value={dressType}
-              onChangeText={setDressType}
-            />
-          </View>
-        </View>
-
-        <View style={styles.rowTwo}>
-          <View style={[styles.inputGroup, { flex: 1 }]}>
-            <Text style={styles.label}>Collection</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="e.g. Party & Festive Sparkle"
-              value={collection}
-              onChangeText={setCollection}
-            />
-          </View>
-
-          <View style={[styles.inputGroup, { flex: 1 }]}>
-            <Text style={styles.label}>Availability Status</Text>
-            <View style={styles.pillSelector}>
-              <TouchableOpacity
-                style={[
-                  styles.pillOption,
-                  availability === 'available' && styles.pillOptionActive,
-                ]}
-                onPress={() => setAvailability('available')}
-              >
-                <Text
-                  style={[
-                    styles.pillOptionText,
-                    availability === 'available' && styles.pillOptionTextActive,
-                  ]}
-                >
-                  In Stock
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.pillOption,
-                  availability === 'limited' && styles.pillOptionActive,
-                ]}
-                onPress={() => setAvailability('limited')}
-              >
-                <Text
-                  style={[
-                    styles.pillOptionText,
-                    availability === 'limited' && styles.pillOptionTextActive,
-                  ]}
-                >
-                  Limited
-                </Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[
-                  styles.pillOption,
-                  availability === 'out_of_stock' && styles.pillOptionActive,
-                ]}
-                onPress={() => setAvailability('out_of_stock')}
-              >
-                <Text
-                  style={[
-                    styles.pillOptionText,
-                    availability === 'out_of_stock' && styles.pillOptionTextActive,
-                  ]}
-                >
-                  Out of Stock
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Description & Fabric Details</Text>
-          <TextInput
-            style={[styles.input, styles.textArea]}
-            placeholder="Fabric composition, snap buttons, design details..."
-            value={description}
-            onChangeText={setDescription}
-            multiline
-            numberOfLines={4}
-          />
-        </View>
-
-        <View style={styles.toggleRow}>
-          <TouchableOpacity
-            style={[styles.checkbox, featured && styles.checkboxActive]}
-            onPress={() => setFeatured(!featured)}
-          >
-            <Text style={styles.checkboxCheck}>{featured ? '✓' : ''}</Text>
-          </TouchableOpacity>
-          <Text style={styles.toggleLabel}>
-            Mark as Featured (showcases with gold badge on catalogue homepage)
-          </Text>
-        </View>
-      </View>
-
-      {/* 4 Dedicated Images Section */}
+      {/* 1. 4 Images for one card */}
       <View style={styles.card}>
         <View style={styles.sectionHeaderRow}>
-          <View>
-            <Text style={styles.cardTitle}>Catalogue Photography (4 Image Slots)</Text>
+          <View style={{ flex: 1 }}>
+            <Text style={styles.cardTitle}>4 Photos for Outfit Card</Text>
             <Text style={styles.cardSubtitle}>
-              Upload 4 photos per dress so users can swipe and view all angles directly on the catalogue cards.
+              Provide 4 photos for the card and product detail carousel (Max 10 MB per image).
             </Text>
           </View>
+          <Text style={styles.imageCounter}>
+            {images.filter((img) => img?.url).length} / 4 Photos Added
+          </Text>
         </View>
 
-        {/* Hidden File Input */}
-        <div>
-          <input
-            type="file"
-            ref={fileInputRef}
-            style={{ display: 'none' }}
-            accept="image/*"
-            onChange={handleImageUpload}
-          />
-        </div>
-
-        <View style={styles.fourSlotsGrid}>
+        <View style={styles.slotsGrid}>
           {SLOT_CONFIG.map((slot, idx) => {
-            const img = images[idx];
-            const isUploadingThis = uploadingSlot === idx;
+            const currentImg = images[idx];
+            const hasImage = Boolean(currentImg?.url);
+            const isSlotUploading = uploadingSlot === idx;
 
             return (
-              <View key={idx} style={styles.slotCard}>
+              <View
+                key={slot.title}
+                style={[styles.slotCard, idx === 0 && styles.slotCardPrimary]}
+              >
                 <View style={styles.slotHeader}>
-                  <Text style={styles.slotTitle}>{slot.title}</Text>
-                  <Text style={styles.slotDesc}>{slot.desc}</Text>
+                  <Text style={styles.slotTitle} numberOfLines={1}>{slot.title}</Text>
+                  {idx === 0 && <Text style={styles.primaryBadge}>Main Cover</Text>}
                 </View>
+                <Text style={styles.slotDesc}>{slot.desc}</Text>
 
-                {img ? (
-                  <View style={styles.slotImageWrapper}>
-                    <Image source={{ uri: img.url }} style={styles.slotImagePreview} />
-                    <View style={styles.slotActionButtons}>
+                {/* Slot Preview Box */}
+                <View style={styles.slotPreviewBox}>
+                  {isSlotUploading ? (
+                    <View style={styles.uploadingBox}>
+                      <ActivityIndicator size="small" color="#7C3AED" />
+                      <Text style={styles.uploadingText}>Uploading...</Text>
+                    </View>
+                  ) : hasImage ? (
+                    <View style={styles.previewImageContainer}>
+                      <Image
+                        source={{ uri: currentImg.url }}
+                        style={styles.slotImage}
+                        resizeMode="cover"
+                      />
                       <TouchableOpacity
-                        style={styles.replaceSlotBtn}
-                        onPress={() => triggerUploadForSlot(idx)}
-                        disabled={isUploadingThis}
-                      >
-                        {isUploadingThis ? (
-                          <ActivityIndicator size="small" color="#fff" />
-                        ) : (
-                          <Text style={styles.replaceSlotBtnText}>Replace</Text>
-                        )}
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.urlSlotBtn}
-                        onPress={() => handlePasteUrlForSlot(idx)}
-                      >
-                        <Text style={styles.urlSlotBtnText}>URL</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={styles.removeSlotBtn}
+                        style={styles.removeImageBtn}
                         onPress={() => handleRemoveImage(idx)}
                       >
-                        <Text style={styles.removeSlotBtnText}>✕</Text>
+                        <Text style={styles.removeImageBtnText}>✕ Remove</Text>
                       </TouchableOpacity>
                     </View>
-                  </View>
-                ) : (
-                  <View style={styles.emptySlotBox}>
-                    {isUploadingThis ? (
-                      <ActivityIndicator size="small" color="#6B7280" />
-                    ) : (
-                      <>
-                        <Text style={styles.slotCameraIcon}>📷</Text>
-                        <TouchableOpacity
-                          style={styles.slotUploadActionBtn}
-                          onPress={() => triggerUploadForSlot(idx)}
-                        >
-                          <Text style={styles.slotUploadActionText}>+ Upload Photo</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                          style={styles.slotUrlActionBtn}
-                          onPress={() => handlePasteUrlForSlot(idx)}
-                        >
-                          <Text style={styles.slotUrlActionText}>or Paste URL</Text>
-                        </TouchableOpacity>
-                      </>
-                    )}
-                  </View>
-                )}
+                  ) : (
+                    <View style={styles.emptySlotBox}>
+                      <Camera size={26} color="#94A3B8" strokeWidth={1.5} />
+                      <Text style={styles.emptySlotText}>No image selected</Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Slot Action Buttons */}
+                <View style={styles.slotActions}>
+                  <TouchableOpacity
+                    style={styles.uploadBtn}
+                    onPress={() => triggerUploadForSlot(idx)}
+                  >
+                    <UploadCloud size={14} color="#FFFFFF" strokeWidth={2} />
+                    <Text style={styles.uploadBtnText}>
+                      {hasImage ? 'Change Image' : 'Upload Image'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             );
           })}
         </View>
       </View>
 
-      {/* Age-Based Pricing Section */}
+
+
+      {/* 2. Dress Name & Category */}
       <View style={styles.card}>
-        <View style={styles.sectionHeaderRow}>
-          <div>
-            <Text style={styles.cardTitle}>Available Sizes for Ages</Text>
-            <Text style={styles.cardSubtitle}>
-              Select which baby age sizes are available for this outfit at ₹{uniformPrice || 0}.
-            </Text>
-          </div>
-          <TouchableOpacity
-            style={styles.addTierBtn}
-            onPress={handleAddAgePriceRow}
-          >
-            <Text style={styles.addTierText}>+ Add Size</Text>
-          </TouchableOpacity>
+        <Text style={styles.cardTitle}>Dress Name & Category</Text>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Dress Name *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="e.g. Royal Navy Velvet Tuxedo Romper"
+            value={name}
+            onChangeText={setName}
+          />
         </View>
 
-        {agePrices.length === 0 ? (
-          <Text style={styles.noAgesText}>No age sizes added. Click "+ Add Size" to add available sizes.</Text>
-        ) : (
-          <View style={styles.ageList}>
-            {agePrices.map((ap, idx) => (
-              <View key={idx} style={styles.ageRow}>
-                <View style={{ flex: 3 }}>
-                  <Text style={styles.miniLabel}>Age Bracket</Text>
-                  <TextInput
-                    style={styles.input}
-                    value={ap.ageLabel}
-                    onChangeText={(val) => handleUpdateAgePrice(idx, 'ageLabel', val)}
+        <View style={styles.rowTwoAligned}>
+          <View style={[styles.inputGroup, { flex: 1 }]}>
+            <Text style={styles.label}>Category *</Text>
+            <View style={styles.pillSelectorRow}>
+              <TouchableOpacity
+                style={[
+                  styles.pillOptionItem,
+                  category === 'boys' && styles.pillBoysActive,
+                ]}
+                onPress={() => setCategory('boys')}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Baby
+                    size={16}
+                    color={category === 'boys' ? '#FFFFFF' : '#2563EB'}
+                    strokeWidth={2.2}
                   />
-                </View>
-
-                <View style={{ flex: 2, alignItems: 'center' }}>
-                  <Text style={styles.miniLabel}>Stock Status</Text>
-                  <TouchableOpacity
+                  <Text
                     style={[
-                      styles.statusToggle,
-                      ap.available ? styles.statusAvailable : styles.statusOut,
+                      styles.pillOptionText,
+                      category === 'boys' && styles.pillOptionTextActive,
                     ]}
-                    onPress={() =>
-                      handleUpdateAgePrice(idx, 'available', !ap.available)
-                    }
                   >
-                    <Text style={styles.statusToggleText}>
-                      {ap.available ? 'In Stock' : 'Out of Stock'}
-                    </Text>
-                  </TouchableOpacity>
+                    Boys Collection
+                  </Text>
                 </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.pillOptionItem,
+                  category === 'girls' && styles.pillGirlsActive,
+                ]}
+                onPress={() => setCategory('girls')}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <Heart
+                    size={16}
+                    color={category === 'girls' ? '#FFFFFF' : '#EC4899'}
+                    strokeWidth={2.2}
+                  />
+                  <Text
+                    style={[
+                      styles.pillOptionText,
+                      category === 'girls' && styles.pillOptionTextActive,
+                    ]}
+                  >
+                    Girls Collection
+                  </Text>
+                </View>
+              </TouchableOpacity>
 
-                <TouchableOpacity
-                  style={styles.deleteAgeBtn}
-                  onPress={() => handleRemoveAgePrice(idx)}
-                >
-                  <Text style={styles.deleteAgeText}>✕</Text>
-                </TouchableOpacity>
-              </View>
-            ))}
+            </View>
           </View>
+
+          <View style={[styles.inputGroup, { flex: 0.8 }]}>
+            <Text style={styles.label}>Catalogue Price (₹) *</Text>
+            <TextInput
+              style={[styles.input, { height: 44 }]}
+              placeholder="e.g. 749"
+              keyboardType="numeric"
+              value={price}
+              onChangeText={setPrice}
+            />
+          </View>
+        </View>
+      </View>
+
+
+      {/* 3. Available Ages (2-3yr, 3-4yr, 4-5yr ... 10-12yr) */}
+      <View style={styles.card}>
+        <View style={styles.sectionHeaderRow}>
+          <View>
+            <Text style={styles.cardTitle}>Available Ages</Text>
+            <Text style={styles.cardSubtitle}>
+              Select which age brackets this dress is available for (2-3yr to 10-12yr).
+            </Text>
+          </View>
+          <View style={{ flexDirection: 'row', gap: 8 }}>
+            <TouchableOpacity
+              style={styles.miniBtn}
+              onPress={() => setSelectedAges([...STANDARD_AGES])}
+            >
+              <Text style={styles.miniBtnText}>Select All</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.miniBtn}
+              onPress={() => setSelectedAges(['2-3yr'])}
+            >
+              <Text style={styles.miniBtnText}>Reset</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        <View style={styles.chipsContainer}>
+          {STANDARD_AGES.map((age) => {
+            const isSelected = selectedAges.includes(age);
+            return (
+              <TouchableOpacity
+                key={age}
+                style={[
+                  styles.chip,
+                  isSelected && styles.chipActive,
+                ]}
+                onPress={() => toggleAge(age)}
+              >
+                <Text style={[styles.chipText, isSelected && styles.chipTextActive]}>
+                  {isSelected ? `✓ ${age}` : age}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </View>
+
+
+      {/* Bottom Action Buttons */}
+      <View style={styles.bottomBar}>
+        {isEditing && (
+          <TouchableOpacity
+            style={styles.deleteBottomBtn}
+            onPress={handleDelete}
+            disabled={saving}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Trash2 size={14} color="#DC2626" strokeWidth={2} />
+              <Text style={styles.deleteBtnText}>Delete Outfit from Catalogue</Text>
+            </View>
+
+          </TouchableOpacity>
         )}
+
+        <View style={{ flexDirection: 'row', gap: 12, marginLeft: 'auto' }}>
+          <TouchableOpacity
+            style={styles.cancelBtn}
+            onPress={() => onNavigate('products')}
+          >
+            <Text style={styles.cancelBtnText}>Cancel</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
+            onPress={handleSave}
+            disabled={saving}
+          >
+            {saving ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : (
+              <Text style={styles.saveBtnText}>
+                {isEditing ? 'Save Changes' : 'Publish Outfit'}
+              </Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
   );
@@ -617,365 +575,407 @@ export default function ProductEditScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#F8FAFC',
   },
   content: {
     padding: 24,
-    maxWidth: 900,
+    maxWidth: 1040,
     width: '100%',
-    alignSelf: 'center',
+    marginHorizontal: 'auto',
     gap: 20,
+    paddingBottom: 60,
   },
   center: {
-    padding: 60,
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
+    padding: 40,
   },
   loadingText: {
-    marginTop: 10,
-    fontSize: 13,
-    color: '#6B7280',
+    marginTop: 12,
+    fontSize: 14,
+    color: '#64748B',
+    fontWeight: '600',
   },
   header: {
     flexDirection: 'row',
+    alignItems: 'flex-start',
     justifyContent: 'space-between',
-    alignItems: 'center',
     flexWrap: 'wrap',
     gap: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E2E8F0',
+    paddingBottom: 16,
   },
   title: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#1C1E24',
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#0F172A',
+    letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 13,
-    color: '#5F677D',
-    marginTop: 2,
+    color: '#64748B',
+    marginTop: 4,
+    maxWidth: 600,
   },
   headerButtons: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 10,
   },
   cancelBtn: {
-    backgroundColor: '#E5E7EB',
-    paddingHorizontal: 16,
     paddingVertical: 10,
+    paddingHorizontal: 18,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
+    backgroundColor: '#FFFFFF',
   },
   cancelBtnText: {
-    color: '#374151',
+    fontSize: 14,
     fontWeight: '700',
-    fontSize: 13,
+    color: '#475569',
   },
   saveBtn: {
-    backgroundColor: '#1C1E24',
-    paddingHorizontal: 20,
     paddingVertical: 10,
+    paddingHorizontal: 22,
     borderRadius: 12,
+    backgroundColor: '#7C3AED',
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
   },
   saveBtnDisabled: {
-    opacity: 0.7,
+    opacity: 0.6,
   },
   saveBtnText: {
+    fontSize: 14,
+    fontWeight: '800',
     color: '#FFFFFF',
-    fontWeight: '700',
+  },
+  deleteBtn: {
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    backgroundColor: '#FEE2E2',
+    borderWidth: 1,
+    borderColor: '#FCA5A5',
+  },
+  deleteBtnText: {
     fontSize: 13,
+    fontWeight: '800',
+    color: '#DC2626',
+  },
+  deleteBottomBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    backgroundColor: '#FEE2E2',
+    borderWidth: 1,
+    borderColor: '#FCA5A5',
   },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 20,
-    padding: 24,
+    padding: 22,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#E2E8F0',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
     gap: 16,
+  },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 12,
   },
   cardTitle: {
     fontSize: 16,
     fontWeight: '800',
-    color: '#1C1E24',
+    color: '#0F172A',
   },
   cardSubtitle: {
     fontSize: 12,
-    color: '#6B7280',
-    marginTop: -8,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  imageCounter: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#7C3AED',
+    backgroundColor: '#F3E8FF',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  slotsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 14,
+    marginTop: 4,
+  },
+  slotCard: {
+    flex: 1,
+    minWidth: 210,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    gap: 10,
+  },
+  slotCardPrimary: {
+    borderColor: '#C4B5FD',
+    backgroundColor: '#FAF5FF',
+  },
+  slotHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  slotTitle: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#1E293B',
+  },
+  primaryBadge: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#7C3AED',
+    backgroundColor: '#EDE9FE',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  slotDesc: {
+    fontSize: 11,
+    color: '#64748B',
+  },
+  slotPreviewBox: {
+    height: 180,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptySlotBox: {
+    alignItems: 'center',
+    gap: 6,
+  },
+  cameraIcon: {
+    fontSize: 28,
+  },
+  emptySlotText: {
+    fontSize: 12,
+    color: '#94A3B8',
+    fontWeight: '600',
+  },
+  previewImageContainer: {
+    width: '100%',
+    height: '100%',
+    position: 'relative',
+  },
+  slotImage: {
+    width: '100%',
+    height: '100%',
+  },
+  removeImageBtn: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  removeImageBtnText: {
+    fontSize: 11,
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  uploadingBox: {
+    alignItems: 'center',
+    gap: 6,
+  },
+  uploadingText: {
+    fontSize: 12,
+    color: '#7C3AED',
+    fontWeight: '600',
+  },
+  slotActions: {
+    width: '100%',
+  },
+  uploadBtn: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: '#7C3AED',
+    paddingVertical: 10,
+    borderRadius: 12,
+  },
+  uploadBtnText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#FFFFFF',
   },
   inputGroup: {
+
     gap: 6,
   },
   label: {
     fontSize: 13,
-    fontWeight: '700',
-    color: '#374151',
+    fontWeight: '800',
+    color: '#1E293B',
   },
   input: {
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#F8FAFC',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 10,
+    borderColor: '#CBD5E1',
+    borderRadius: 12,
     paddingHorizontal: 14,
     paddingVertical: 10,
-    fontSize: 13,
-    color: '#111827',
+    fontSize: 14,
+    color: '#0F172A',
   },
-  textArea: {
-    height: 90,
-    textAlignVertical: 'top',
-  },
-  rowTwo: {
-    flexDirection: 'row',
-    gap: 16,
-  },
-  pillSelector: {
-    flexDirection: 'row',
-    backgroundColor: '#F3F4F6',
-    borderRadius: 10,
-    padding: 3,
-    gap: 4,
-  },
-  pillOption: {
-    flex: 1,
-    paddingVertical: 7,
-    alignItems: 'center',
-    borderRadius: 8,
-  },
-  pillOptionActive: {
-    backgroundColor: '#FFFFFF',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  pillOptionText: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#4B5563',
-  },
-  pillOptionTextActive: {
-    color: '#111827',
-    fontWeight: '700',
-  },
-  toggleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginTop: 6,
-  },
-  checkbox: {
-    width: 22,
-    height: 22,
-    borderRadius: 6,
-    borderWidth: 1.5,
-    borderColor: '#D1D5DB',
-    backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  checkboxActive: {
-    backgroundColor: '#1C1E24',
-    borderColor: '#1C1E24',
-  },
-  checkboxCheck: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '900',
-  },
-  toggleLabel: {
-    fontSize: 13,
-    color: '#374151',
-    fontWeight: '600',
-  },
-  fourSlotsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 16,
-    marginTop: 12,
-  },
-  slotCard: {
-    flex: 1,
-    minWidth: 220,
-    backgroundColor: '#F9FAFB',
-    borderRadius: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  slotHeader: {
-    marginBottom: 8,
-  },
-  slotTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#111827',
-  },
-  slotDesc: {
-    fontSize: 10,
-    color: '#6B7280',
+  hintText: {
+    fontSize: 11,
+    color: '#64748B',
     marginTop: 2,
   },
-  slotImageWrapper: {
-    width: '100%',
-    height: 180,
-    borderRadius: 12,
-    overflow: 'hidden',
-    position: 'relative',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  slotImagePreview: {
-    width: '100%',
-    height: '100%',
-  },
-  slotActionButtons: {
-    position: 'absolute',
-    bottom: 8,
-    left: 8,
-    right: 8,
+  rowTwoAligned: {
     flexDirection: 'row',
-    gap: 6,
+    alignItems: 'flex-start',
+    gap: 16,
+    flexWrap: 'wrap',
   },
-  replaceSlotBtn: {
-    flex: 2,
-    backgroundColor: 'rgba(17, 24, 39, 0.85)',
-    paddingVertical: 6,
-    borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  replaceSlotBtnText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  urlSlotBtn: {
-    backgroundColor: 'rgba(59, 130, 246, 0.9)',
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  urlSlotBtnText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  removeSlotBtn: {
-    backgroundColor: 'rgba(239, 68, 68, 0.9)',
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderRadius: 6,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  removeSlotBtnText: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  emptySlotBox: {
-    width: '100%',
-    height: 180,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: '#D1D5DB',
-    borderStyle: 'dashed',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-    padding: 12,
-  },
-  slotCameraIcon: {
-    fontSize: 28,
-    marginBottom: 6,
-  },
-  slotUploadActionBtn: {
-    backgroundColor: '#111827',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-    marginBottom: 4,
-  },
-  slotUploadActionText: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  slotUrlActionBtn: {
-    paddingVertical: 4,
-  },
-  slotUrlActionText: {
-    fontSize: 10,
-    color: '#6B7280',
-    textDecorationLine: 'underline',
-  },
-  sectionHeaderRow: {
+  pillSelectorRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  addTierBtn: {
-    backgroundColor: '#F3F4F6',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
-  },
-  addTierText: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#1F2937',
-  },
-  noAgesText: {
-    fontSize: 12,
-    color: '#6B7280',
-    fontStyle: 'italic',
-  },
-  ageList: {
     gap: 10,
+    height: 44,
   },
-  ageRow: {
-    flexDirection: 'row',
-    gap: 12,
-    alignItems: 'flex-end',
-    backgroundColor: '#F9FAFB',
-    padding: 12,
+  pillOptionItem: {
+    flex: 1,
+    height: 44,
     borderRadius: 12,
+    backgroundColor: '#F1F5F9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 12,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+  },
+  pillBoysActive: {
+    backgroundColor: '#2563EB',
+    borderColor: '#1D4ED8',
+  },
+  pillGirlsActive: {
+    backgroundColor: '#EC4899',
+    borderColor: '#DB2777',
+  },
+  pillOptionText: {
+    fontSize: 13,
+    fontWeight: '800',
+    color: '#334155',
+  },
+  pillOptionTextActive: {
+    color: '#FFFFFF',
+  },
+  pillStockInActive: {
+    backgroundColor: '#ECFDF5',
+    borderColor: '#10B981',
+  },
+  pillStockInTextActive: {
+    color: '#047857',
+    fontWeight: '800',
+  },
+  pillStockOutActive: {
+    backgroundColor: '#FEF2F2',
+    borderColor: '#EF4444',
+  },
+  pillStockOutTextActive: {
+    color: '#B91C1C',
+    fontWeight: '800',
+  },
+  chipsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  chip: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    backgroundColor: '#F1F5F9',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#E2E8F0',
   },
-  miniLabel: {
-    fontSize: 11,
+  chipActive: {
+    backgroundColor: '#7C3AED',
+    borderColor: '#7C3AED',
+  },
+  chipText: {
+    fontSize: 12,
     fontWeight: '700',
-    color: '#6B7280',
-    marginBottom: 4,
+    color: '#334155',
   },
-  statusToggle: {
-    paddingVertical: 9,
+  chipTextActive: {
+    color: '#FFFFFF',
+  },
+  miniBtn: {
+    paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 8,
-    alignItems: 'center',
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
-  statusAvailable: {
-    backgroundColor: '#D1FAE5',
-  },
-  statusOut: {
-    backgroundColor: '#FEE2E2',
-  },
-  statusToggleText: {
+  miniBtnText: {
     fontSize: 11,
     fontWeight: '700',
-    color: '#065F46',
+    color: '#64748B',
   },
-  deleteAgeBtn: {
-    padding: 8,
-    alignItems: 'center',
+  addSizeBtn: {
+    backgroundColor: '#1E293B',
+    paddingHorizontal: 16,
+    height: 42,
+    borderRadius: 12,
     justifyContent: 'center',
-    marginBottom: 2,
+    alignItems: 'center',
   },
-  deleteAgeText: {
-    color: '#EF4444',
-    fontSize: 16,
-    fontWeight: 'bold',
+  addSizeBtnText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  bottomBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 14,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#E2E8F0',
+  },
+  contentMobile: {
+    padding: 14,
+    gap: 16,
+  },
+  headerMobile: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: 12,
   },
 });
+

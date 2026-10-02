@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import { api } from '../services/api';
 import { AdminUser } from '../types';
@@ -15,8 +16,8 @@ interface LoginScreenProps {
 }
 
 export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
-  const [email, setEmail] = useState('admin@kiddycloset.com');
-  const [password, setPassword] = useState('Admin@123456');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -42,8 +43,11 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
     <View style={styles.container}>
       <View style={styles.card}>
         <View style={styles.logoContainer}>
-          <Text style={styles.logoEmoji}>🧸</Text>
-          <Text style={styles.brandTitle}>KIDDY CLOSET</Text>
+          <Image
+            source={{ uri: '/images/the-little-placket-banner.png' }}
+            style={styles.logoBannerImg}
+            resizeMode="contain"
+          />
           <Text style={styles.brandSubtitle}>Admin Management Portal</Text>
         </View>
 
@@ -57,7 +61,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
           <Text style={styles.label}>Admin Email</Text>
           <TextInput
             style={styles.input}
-            placeholder="admin@kiddycloset.com"
+            placeholder="Enter email"
             value={email}
             onChangeText={setEmail}
             autoCapitalize="none"
@@ -69,7 +73,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
           <Text style={styles.label}>Password</Text>
           <TextInput
             style={styles.input}
-            placeholder="••••••••"
+            placeholder="Enter password"
             value={password}
             onChangeText={setPassword}
             secureTextEntry
@@ -87,11 +91,6 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
             <Text style={styles.buttonText}>Sign In to Dashboard</Text>
           )}
         </TouchableOpacity>
-
-        <View style={styles.demoBox}>
-          <Text style={styles.demoLabel}>Demo Admin Credentials:</Text>
-          <Text style={styles.demoCreds}>admin@kiddycloset.com / Admin@123456</Text>
-        </View>
       </View>
     </View>
   );
@@ -100,7 +99,7 @@ export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5EFE6',
+    backgroundColor: '#F8FAFC',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -117,27 +116,26 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 20,
     elevation: 5,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
   logoContainer: {
     alignItems: 'center',
     marginBottom: 24,
   },
-  logoEmoji: {
-    fontSize: 48,
+  logoBannerImg: {
+    height: 90,
+    width: 280,
+    maxWidth: '100%',
     marginBottom: 8,
-  },
-  brandTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#1C1E24',
-    letterSpacing: 0.5,
   },
   brandSubtitle: {
     fontSize: 12,
-    color: '#858FA8',
-    fontWeight: '600',
-    marginTop: 2,
+    color: '#7C3AED',
+    fontWeight: '800',
+    marginTop: 4,
     textTransform: 'uppercase',
+    letterSpacing: 0.8,
   },
   errorBox: {
     backgroundColor: '#FEE2E2',
@@ -157,26 +155,32 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    fontWeight: '600',
-    color: '#3F4555',
+    fontWeight: '700',
+    color: '#1E293B',
     marginBottom: 6,
   },
   input: {
-    backgroundColor: '#FAF8F5',
-    borderWidth: 1,
-    borderColor: '#EBDDC5',
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 14,
-    color: '#1C1E24',
+    color: '#0F172A',
+    fontWeight: '600',
   },
   button: {
-    backgroundColor: '#2A2E39',
+    backgroundColor: '#7C3AED',
     borderRadius: 14,
     paddingVertical: 14,
     alignItems: 'center',
     marginTop: 8,
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 3,
   },
   buttonDisabled: {
     opacity: 0.7,
@@ -184,27 +188,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#FFFFFF',
     fontSize: 15,
-    fontWeight: '700',
-  },
-  demoBox: {
-    marginTop: 20,
-    padding: 12,
-    backgroundColor: '#FAF8F5',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#EBDDC5',
-    alignItems: 'center',
-  },
-  demoLabel: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#5F677D',
-    textTransform: 'uppercase',
-  },
-  demoCreds: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#1C1E24',
-    marginTop: 2,
+    fontWeight: '800',
   },
 });

@@ -1,672 +1,490 @@
 {
   "products": {
-    "94dea81fe46b4716a04d": {
+    "prod_boy_dino_hoodie": {
+      "id": "prod_boy_dino_hoodie",
+      "name": "Hoodie",
+      "slug": "hoodie",
+      "category": "boys",
+      "dressType": "Boys Outfit",
+      "collection": "Boys Collection",
+      "description": "",
+      "price": 699,
+      "startingPrice": "₹699+",
+      "ageGroup": "2-3yr",
+      "images": [
+        {
+          "url": "/images/products/boy-dino-hoodie.jpg",
+          "order": 0,
+          "publicId": "boy-dino-hoodie"
+        },
+        {
+          "url": "/images/products/boy-bear-romper.jpg",
+          "order": 1,
+          "publicId": "boy-bear-romper"
+        },
+        {
+          "url": "/images/products/boy-check-shirt.jpg",
+          "order": 2,
+          "publicId": "boy-check-shirt"
+        }
+      ],
+      "availability": "available",
+      "createdAt": "2026-10-02T10:00:00.000Z",
+      "updatedAt": "2026-10-02T08:11:29.585Z",
+      "availableAges": [
+        "2-3yr",
+        "3-4yr"
+      ]
+    },
+    "prod_boy_linen_set": {
+      "id": "prod_boy_linen_set",
+      "name": "Linen Shirt Set",
+      "slug": "linen-shirt-set",
+      "category": "boys",
+      "dressType": "Linen Set",
+      "collection": "Sunny Days & Summer Fun",
+      "description": "Charming breathable linen blend set in sage and warm sand. Features coconut shell buttons and elasticated drawstring shorts.",
+      "price": 799,
+      "startingPrice": "₹799+",
+      "ageGroup": "6–8 Y",
+      "images": [
+        {
+          "url": "/images/products/boy-explorer-set.jpg",
+          "order": 0,
+          "publicId": "boy-explorer-set"
+        },
+        {
+          "url": "/images/products/boy-gentleman-outfit.jpg",
+          "order": 1,
+          "publicId": "boy-gentleman-outfit"
+        },
+        {
+          "url": "/images/products/boy-check-shirt.jpg",
+          "order": 2,
+          "publicId": "boy-check-shirt"
+        }
+      ],
+      "availability": "available",
+      "createdAt": "2026-10-02T10:00:00.000Z",
+      "updatedAt": "2026-10-02T10:00:00.000Z"
+    },
+    "prod_boy_striped_polo": {
+      "id": "prod_boy_striped_polo",
+      "name": "Striped Polo",
+      "slug": "striped-polo",
+      "category": "boys",
+      "dressType": "Polo",
+      "collection": "Playtime Rompers & Sets",
+      "description": "Classic horizontal yarn-dyed navy striped polo t-shirt with soft collar and wooden buttons. Premium cotton knit.",
+      "price": 649,
+      "startingPrice": "₹649+",
+      "ageGroup": "3–5 Y",
+      "images": [
+        {
+          "url": "/images/products/boy-striped-polo.jpg",
+          "order": 0,
+          "publicId": "boy-striped-polo"
+        },
+        {
+          "url": "/images/products/boy-check-shirt.jpg",
+          "order": 1,
+          "publicId": "boy-check-shirt"
+        },
+        {
+          "url": "/images/products/boy-explorer-set.jpg",
+          "order": 2,
+          "publicId": "boy-explorer-set"
+        }
+      ],
+      "availability": "available",
+      "createdAt": "2026-10-02T10:00:00.000Z",
+      "updatedAt": "2026-10-02T10:00:00.000Z"
+    },
+    "prod_boy_tuxedo": {
+      "id": "prod_boy_tuxedo",
+      "name": "Royal Velvet Prince Tuxedo Romper",
+      "slug": "royal-velvet-prince-tuxedo-romper",
+      "category": "boys",
+      "dressType": "Tuxedo",
+      "collection": "Party & Festive Sparkle",
+      "description": "Regal midnight navy velvet tuxedo romper with satin lapels, miniature bowtie, and antique gold buttons.",
+      "price": 1499,
+      "startingPrice": "₹1000+",
+      "ageGroup": "0–2 Y",
+      "images": [
+        {
+          "url": "/images/products/boy-prince-partywear.jpg",
+          "order": 0,
+          "publicId": "boy-prince-partywear"
+        },
+        {
+          "url": "/images/products/boy-gentleman-outfit.jpg",
+          "order": 1,
+          "publicId": "boy-gentleman-outfit"
+        }
+      ],
+      "availability": "available",
+      "createdAt": "2026-10-02T10:00:00.000Z",
+      "updatedAt": "2026-10-02T10:00:00.000Z"
+    },
+    "prod_boy_bear_romper": {
+      "id": "prod_boy_bear_romper",
       "name": "Bear Hug Cozy Fleece Romper",
+      "slug": "bear-hug-cozy-fleece-romper",
       "category": "boys",
       "dressType": "Romper",
-      "collection": "Playtime Rompers & Sets",
-      "description": "Super soft teddy bear ear hooded romper made from 100% organic combed cotton fleece. Designed with gentle wooden buttons, nickel-free snap fastenings for easy diaper changes, and ultra-gentle wrist cuffs for delicate baby skin.",
+      "collection": "Newborn Essentials",
+      "description": "Super soft teddy bear ear hooded romper made from 100% organic combed cotton fleece with easy snap fastenings.",
+      "price": 899,
+      "startingPrice": "₹750 – ₹1000",
+      "ageGroup": "0–2 Y",
+      "images": [
+        {
+          "url": "/images/products/boy-bear-romper.jpg",
+          "order": 0,
+          "publicId": "boy-bear-romper"
+        },
+        {
+          "url": "/images/products/boy-explorer-set.jpg",
+          "order": 1,
+          "publicId": "boy-explorer-set"
+        }
+      ],
       "availability": "available",
-      "featured": true,
-      "images": [
-        {
-          "url": "/images/products/boy-bear-romper.jpg",
-          "publicId": "boy-bear-romper",
-          "order": 0
-        },
-        {
-          "url": "/images/products/boy-gentleman-outfit.jpg",
-          "publicId": "boy-gentleman-outfit",
-          "order": 1
-        },
-        {
-          "url": "/images/products/boy-prince-partywear.jpg",
-          "publicId": "boy-prince-partywear",
-          "order": 2
-        },
-        {
-          "url": "/images/products/boy-explorer-set.jpg",
-          "publicId": "boy-explorer-set",
-          "order": 3
-        }
-      ],
-      "agePrices": [
-        {
-          "ageId": "cf7abddadd584ee0a42e",
-          "ageLabel": "0-3 Months",
-          "minMonths": 0,
-          "maxMonths": 3,
-          "price": 899,
-          "available": true
-        },
-        {
-          "ageId": "38bec3316ee645c9b364",
-          "ageLabel": "3-6 Months",
-          "minMonths": 3,
-          "maxMonths": 6,
-          "price": 899,
-          "available": true
-        },
-        {
-          "ageId": "fc9765f9a1694b2f8cb9",
-          "ageLabel": "6-9 Months",
-          "minMonths": 6,
-          "maxMonths": 9,
-          "price": 899,
-          "available": true
-        },
-        {
-          "ageId": "c0b830f5c3fe488aa8cf",
-          "ageLabel": "9-12 Months",
-          "minMonths": 9,
-          "maxMonths": 12,
-          "price": 899,
-          "available": true
-        }
-      ],
-      "slug": "bear-hug-cozy-fleece-romper",
-      "createdAt": "2026-10-01T11:01:24.270Z",
-      "updatedAt": "2026-10-01T11:01:24.270Z",
-      "price": 899
+      "createdAt": "2026-10-02T10:00:00.000Z",
+      "updatedAt": "2026-10-02T10:00:00.000Z"
     },
-    "aa9b50dfc0af40c3afea": {
-      "name": "Little Explorer Linen Shirt & Shorts Set",
-      "category": "boys",
-      "dressType": "Two-Piece Set",
-      "collection": "Sunny Days & Summer Fun",
-      "description": "Charming breathable linen blend set in sage and warm sand. Features a mandarin collar shirt with coconut shell buttons and elasticated drawstring shorts. Lightweight and ultra-comfortable for sunny outdoor picnics and family strolls.",
-      "availability": "available",
-      "featured": true,
-      "images": [
-        {
-          "url": "/images/products/boy-explorer-set.jpg",
-          "publicId": "boy-explorer-set",
-          "order": 0
-        },
-        {
-          "url": "/images/products/boy-gentleman-outfit.jpg",
-          "publicId": "boy-gentleman-outfit",
-          "order": 1
-        },
-        {
-          "url": "/images/products/boy-prince-partywear.jpg",
-          "publicId": "boy-prince-partywear",
-          "order": 2
-        },
-        {
-          "url": "/images/products/boy-bear-romper.jpg",
-          "publicId": "boy-bear-romper",
-          "order": 3
-        }
-      ],
-      "agePrices": [
-        {
-          "ageId": "fc9765f9a1694b2f8cb9",
-          "ageLabel": "6-9 Months",
-          "minMonths": 6,
-          "maxMonths": 9,
-          "price": 1199,
-          "available": true
-        },
-        {
-          "ageId": "c0b830f5c3fe488aa8cf",
-          "ageLabel": "9-12 Months",
-          "minMonths": 9,
-          "maxMonths": 12,
-          "price": 1199,
-          "available": true
-        },
-        {
-          "ageId": "3fa1ba47641240fb8c02",
-          "ageLabel": "12-18 Months",
-          "minMonths": 12,
-          "maxMonths": 18,
-          "price": 1199,
-          "available": true
-        },
-        {
-          "ageId": "c3c94950acce41e999ef",
-          "ageLabel": "18-24 Months",
-          "minMonths": 18,
-          "maxMonths": 24,
-          "price": 1199,
-          "available": true
-        }
-      ],
-      "slug": "little-explorer-linen-shirt-and-shorts-set",
-      "createdAt": "2026-10-01T11:01:24.270Z",
-      "updatedAt": "2026-10-01T11:01:24.270Z",
-      "price": 1199
-    },
-    "ef04ee59930447ef909b": {
-      "name": "Mini Gentleman Waistcoat & Bowtie Suit",
-      "category": "boys",
-      "dressType": "Partywear",
-      "collection": "Party & Festive Sparkle",
-      "description": "The quintessential formal celebratory attire for your little prince. Includes an organic cotton pinstripe vest, detachable soft clip bowtie, woven dress shirt, and tailored comfort trousers with flexible waistband.",
-      "availability": "available",
-      "featured": true,
-      "images": [
-        {
-          "url": "/images/products/boy-gentleman-outfit.jpg",
-          "publicId": "boy-gentleman-outfit",
-          "order": 0
-        },
-        {
-          "url": "/images/products/boy-prince-partywear.jpg",
-          "publicId": "boy-prince-partywear",
-          "order": 1
-        },
-        {
-          "url": "/images/products/boy-explorer-set.jpg",
-          "publicId": "boy-explorer-set",
-          "order": 2
-        },
-        {
-          "url": "/images/products/boy-bear-romper.jpg",
-          "publicId": "boy-bear-romper",
-          "order": 3
-        }
-      ],
-      "agePrices": [
-        {
-          "ageId": "38bec3316ee645c9b364",
-          "ageLabel": "3-6 Months",
-          "minMonths": 3,
-          "maxMonths": 6,
-          "price": 1499,
-          "available": true
-        },
-        {
-          "ageId": "fc9765f9a1694b2f8cb9",
-          "ageLabel": "6-9 Months",
-          "minMonths": 6,
-          "maxMonths": 9,
-          "price": 1499,
-          "available": true
-        },
-        {
-          "ageId": "c0b830f5c3fe488aa8cf",
-          "ageLabel": "9-12 Months",
-          "minMonths": 9,
-          "maxMonths": 12,
-          "price": 1499,
-          "available": true
-        },
-        {
-          "ageId": "3fa1ba47641240fb8c02",
-          "ageLabel": "12-18 Months",
-          "minMonths": 12,
-          "maxMonths": 18,
-          "price": 1499,
-          "available": true
-        }
-      ],
-      "slug": "mini-gentleman-waistcoat-and-bowtie-suit",
-      "createdAt": "2026-10-01T11:01:24.271Z",
-      "updatedAt": "2026-10-01T11:01:24.271Z",
-      "price": 1499
-    },
-    "f1f75004bf2747cdb656": {
-      "name": "Royal Velvet Prince Tuxedo Romper",
-      "category": "boys",
-      "dressType": "Partywear",
-      "collection": "Party & Festive Sparkle",
-      "description": "Majestic navy velvet bodysuit crafted with gold-toned embroidery trim and silk-touch satin collar. Perfect for first birthday celebrations, weddings, and memorable photoshoot memories.",
-      "availability": "limited",
-      "featured": false,
-      "images": [
-        {
-          "url": "/images/products/boy-prince-partywear.jpg",
-          "publicId": "boy-prince-partywear",
-          "order": 0
-        },
-        {
-          "url": "/images/products/boy-gentleman-outfit.jpg",
-          "publicId": "boy-gentleman-outfit",
-          "order": 1
-        },
-        {
-          "url": "/images/products/boy-explorer-set.jpg",
-          "publicId": "boy-explorer-set",
-          "order": 2
-        },
-        {
-          "url": "/images/products/boy-bear-romper.jpg",
-          "publicId": "boy-bear-romper",
-          "order": 3
-        }
-      ],
-      "agePrices": [
-        {
-          "ageId": "fc9765f9a1694b2f8cb9",
-          "ageLabel": "6-9 Months",
-          "minMonths": 6,
-          "maxMonths": 9,
-          "price": 1699,
-          "available": true
-        },
-        {
-          "ageId": "c0b830f5c3fe488aa8cf",
-          "ageLabel": "9-12 Months",
-          "minMonths": 9,
-          "maxMonths": 12,
-          "price": 1699,
-          "available": true
-        },
-        {
-          "ageId": "3fa1ba47641240fb8c02",
-          "ageLabel": "12-18 Months",
-          "minMonths": 12,
-          "maxMonths": 18,
-          "price": 1699,
-          "available": false
-        }
-      ],
-      "slug": "royal-velvet-prince-tuxedo-romper",
-      "createdAt": "2026-10-01T11:01:24.271Z",
-      "updatedAt": "2026-10-01T11:01:24.271Z",
-      "price": 1699
-    },
-    "30eb1ebe4d504e7f8e1b": {
-      "name": "Angelic Tulle & Lace Princess Frock",
+    "prod_girl_floral_bow": {
+      "id": "prod_girl_floral_bow",
+      "name": "Floral Frock with Bow",
+      "slug": "floral-frock-with-bow",
       "category": "girls",
       "dressType": "Frock",
-      "collection": "Party & Festive Sparkle",
-      "description": "Delicate blush pink multi-layer tiered tulle frock adorned with intricate floral lace embroidery on the bodice. Lined with 100% breathable organic cotton muslin so zero tulle touches delicate skin.",
-      "availability": "available",
-      "featured": true,
-      "images": [
-        {
-          "url": "/images/products/girl-angel-frock.jpg",
-          "publicId": "girl-angel-frock",
-          "order": 0
-        },
-        {
-          "url": "/images/products/girl-floral-dream.jpg",
-          "publicId": "girl-floral-dream",
-          "order": 1
-        },
-        {
-          "url": "/images/products/girl-blossom-dress.jpg",
-          "publicId": "girl-blossom-dress",
-          "order": 2
-        },
-        {
-          "url": "/images/products/girl-bunny-romper.jpg",
-          "publicId": "girl-bunny-romper",
-          "order": 3
-        }
-      ],
-      "agePrices": [
-        {
-          "ageId": "cf7abddadd584ee0a42e",
-          "ageLabel": "0-3 Months",
-          "minMonths": 0,
-          "maxMonths": 3,
-          "price": 1299,
-          "available": true
-        },
-        {
-          "ageId": "38bec3316ee645c9b364",
-          "ageLabel": "3-6 Months",
-          "minMonths": 3,
-          "maxMonths": 6,
-          "price": 1299,
-          "available": true
-        },
-        {
-          "ageId": "fc9765f9a1694b2f8cb9",
-          "ageLabel": "6-9 Months",
-          "minMonths": 6,
-          "maxMonths": 9,
-          "price": 1299,
-          "available": true
-        },
-        {
-          "ageId": "c0b830f5c3fe488aa8cf",
-          "ageLabel": "9-12 Months",
-          "minMonths": 9,
-          "maxMonths": 12,
-          "price": 1299,
-          "available": true
-        }
-      ],
-      "slug": "angelic-tulle-and-lace-princess-frock",
-      "createdAt": "2026-10-01T11:01:24.271Z",
-      "updatedAt": "2026-10-01T11:01:24.271Z",
-      "price": 1299
-    },
-    "288f1228fba94497ba9c": {
-      "name": "Spring Blossom Floral Sundress",
-      "category": "girls",
-      "dressType": "Dress",
       "collection": "Sunny Days & Summer Fun",
-      "description": "Vintage-inspired botanical watercolor sundress featuring ruffled cap sleeves, smocked elastic bodice, and matching sunbonnet hat. Crafted from lightweight combed cotton voile.",
-      "availability": "available",
-      "featured": true,
+      "description": "Cute floral frock with stylish bow. Comfortable and perfect for any occasion. Made with ultra-soft organic cotton.",
+      "price": 799,
+      "startingPrice": "₹799 onwards",
+      "ageGroup": "3–5 Y",
       "images": [
         {
-          "url": "/images/products/girl-blossom-dress.jpg",
-          "publicId": "girl-blossom-dress",
-          "order": 0
-        },
-        {
-          "url": "/images/products/girl-angel-frock.jpg",
-          "publicId": "girl-angel-frock",
-          "order": 1
+          "url": "/images/products/girl-floral-bow-frock.jpg",
+          "order": 0,
+          "publicId": "girl-floral-bow-frock"
         },
         {
           "url": "/images/products/girl-floral-dream.jpg",
-          "publicId": "girl-floral-dream",
-          "order": 2
+          "order": 1,
+          "publicId": "girl-floral-dream"
         },
         {
-          "url": "/images/products/girl-bunny-romper.jpg",
-          "publicId": "girl-bunny-romper",
-          "order": 3
+          "url": "/images/products/girl-blossom-dress.jpg",
+          "order": 2,
+          "publicId": "girl-blossom-dress"
         }
       ],
-      "agePrices": [
-        {
-          "ageId": "38bec3316ee645c9b364",
-          "ageLabel": "3-6 Months",
-          "minMonths": 3,
-          "maxMonths": 6,
-          "price": 999,
-          "available": true
-        },
-        {
-          "ageId": "fc9765f9a1694b2f8cb9",
-          "ageLabel": "6-9 Months",
-          "minMonths": 6,
-          "maxMonths": 9,
-          "price": 999,
-          "available": true
-        },
-        {
-          "ageId": "c0b830f5c3fe488aa8cf",
-          "ageLabel": "9-12 Months",
-          "minMonths": 9,
-          "maxMonths": 12,
-          "price": 999,
-          "available": true
-        },
-        {
-          "ageId": "3fa1ba47641240fb8c02",
-          "ageLabel": "12-18 Months",
-          "minMonths": 12,
-          "maxMonths": 18,
-          "price": 999,
-          "available": true
-        }
-      ],
-      "slug": "spring-blossom-floral-sundress",
-      "createdAt": "2026-10-01T11:01:24.272Z",
-      "updatedAt": "2026-10-01T11:01:24.272Z",
-      "price": 999
+      "availability": "available",
+      "createdAt": "2026-10-02T10:00:00.000Z",
+      "updatedAt": "2026-10-02T10:00:00.000Z"
     },
-    "67f7e1148cc1449ca900": {
+    "prod_girl_yellow_frock": {
+      "id": "prod_girl_yellow_frock",
+      "name": "Yellow Party Frock",
+      "slug": "yellow-party-frock",
+      "category": "girls",
+      "dressType": "Party Frock",
+      "collection": "Party & Festive Sparkle",
+      "description": "Joyful sunny yellow layered party frock with fine floral embroidery and soft flutter wings. Gentle on baby skin.",
+      "price": 699,
+      "startingPrice": "₹699+",
+      "ageGroup": "0–2 Y",
+      "images": [
+        {
+          "url": "/images/products/girl-yellow-frock.jpg",
+          "order": 0,
+          "publicId": "girl-yellow-frock"
+        },
+        {
+          "url": "/images/products/girl-blossom-dress.jpg",
+          "order": 1,
+          "publicId": "girl-blossom-dress"
+        },
+        {
+          "url": "/images/products/girl-angel-frock.jpg",
+          "order": 2,
+          "publicId": "girl-angel-frock"
+        }
+      ],
+      "availability": "available",
+      "createdAt": "2026-10-02T10:00:00.000Z",
+      "updatedAt": "2026-10-02T10:00:00.000Z"
+    },
+    "prod_girl_lavender_dress": {
+      "id": "prod_girl_lavender_dress",
+      "name": "Lavender Party Dress",
+      "slug": "lavender-party-dress",
+      "category": "girls",
+      "dressType": "Party Dress",
+      "collection": "Party & Festive Sparkle",
+      "description": "Ethereal pastel lavender fairy dress featuring multi-tiered tulle skirt and hand-stitched 3D floral petals.",
+      "price": 899,
+      "startingPrice": "₹899+",
+      "ageGroup": "6–8 Y",
+      "images": [
+        {
+          "url": "/images/products/girl-lavender-dress.jpg",
+          "order": 0,
+          "publicId": "girl-lavender-dress"
+        },
+        {
+          "url": "/images/products/girl-angel-frock.jpg",
+          "order": 1,
+          "publicId": "girl-angel-frock"
+        },
+        {
+          "url": "/images/products/girl-floral-bow-frock.jpg",
+          "order": 2,
+          "publicId": "girl-floral-bow-frock"
+        }
+      ],
+      "availability": "available",
+      "createdAt": "2026-10-02T10:00:00.000Z",
+      "updatedAt": "2026-10-02T10:00:00.000Z"
+    },
+    "prod_girl_floral_summer": {
+      "id": "prod_girl_floral_summer",
+      "name": "Floral Summer Dress",
+      "slug": "floral-summer-dress",
+      "category": "girls",
+      "dressType": "Summer Dress",
+      "collection": "Sunny Days & Summer Fun",
+      "description": "Lightweight, airy pastel summer sundress made with 100% breathable cotton muslin. Gentle against delicate skin.",
+      "price": 649,
+      "startingPrice": "₹649+",
+      "ageGroup": "3–5 Y",
+      "images": [
+        {
+          "url": "/images/products/girl-floral-summer-dress.jpg",
+          "order": 0,
+          "publicId": "girl-floral-summer-dress"
+        },
+        {
+          "url": "/images/products/girl-floral-dream.jpg",
+          "order": 1,
+          "publicId": "girl-floral-dream"
+        },
+        {
+          "url": "/images/products/girl-blossom-dress.jpg",
+          "order": 2,
+          "publicId": "girl-blossom-dress"
+        }
+      ],
+      "availability": "available",
+      "createdAt": "2026-10-02T10:00:00.000Z",
+      "updatedAt": "2026-10-02T10:00:00.000Z"
+    },
+    "prod_girl_angelic_frock": {
+      "id": "prod_girl_angelic_frock",
+      "name": "Angelic Tulle & Lace Princess Frock",
+      "slug": "angelic-tulle-and-lace-princess-frock",
+      "category": "girls",
+      "dressType": "Princess Frock",
+      "collection": "Party & Festive Sparkle",
+      "description": "Magical birthday princess gown with delicate Chantilly lace bodice and multi-tiered French tulle skirt.",
+      "price": 1299,
+      "startingPrice": "₹1000+",
+      "ageGroup": "6–8 Y",
+      "images": [
+        {
+          "url": "/images/products/girl-angel-frock.jpg",
+          "order": 0,
+          "publicId": "girl-angel-frock"
+        },
+        {
+          "url": "/images/products/girl-lavender-dress.jpg",
+          "order": 1,
+          "publicId": "girl-lavender-dress"
+        },
+        {
+          "url": "/images/products/girl-blossom-dress.jpg",
+          "order": 2,
+          "publicId": "girl-blossom-dress"
+        }
+      ],
+      "availability": "available",
+      "createdAt": "2026-10-02T10:00:00.000Z",
+      "updatedAt": "2026-10-02T10:00:00.000Z"
+    },
+    "prod_girl_bunny_romper": {
+      "id": "prod_girl_bunny_romper",
       "name": "Sweet Bunny Ear Knitted Romper",
+      "slug": "sweet-bunny-ear-knitted-romper",
       "category": "girls",
       "dressType": "Romper",
-      "collection": "Playtime Rompers & Sets",
-      "description": "Whimsical pastel lilac knit romper with bunny ear details and cable knit texture. Made with hypoallergenic bamboo-cotton yarn that stays soft wash after wash.",
+      "collection": "Newborn Essentials",
+      "description": "Charming knitted blush pink romper with cute floppy bunny ears hood. Made from hypoallergenic organic cotton yarn.",
+      "price": 899,
+      "startingPrice": "₹750 – ₹1000",
+      "ageGroup": "0–2 Y",
+      "images": [
+        {
+          "url": "/images/products/girl-bunny-romper.jpg",
+          "order": 0,
+          "publicId": "girl-bunny-romper"
+        },
+        {
+          "url": "/images/products/girl-floral-summer-dress.jpg",
+          "order": 1,
+          "publicId": "girl-floral-summer-dress"
+        }
+      ],
       "availability": "available",
-      "featured": false,
-      "images": [
-        {
-          "url": "/images/products/girl-bunny-romper.jpg",
-          "publicId": "girl-bunny-romper",
-          "order": 0
-        },
-        {
-          "url": "/images/products/girl-angel-frock.jpg",
-          "publicId": "girl-angel-frock",
-          "order": 1
-        },
-        {
-          "url": "/images/products/girl-floral-dream.jpg",
-          "publicId": "girl-floral-dream",
-          "order": 2
-        },
-        {
-          "url": "/images/products/girl-blossom-dress.jpg",
-          "publicId": "girl-blossom-dress",
-          "order": 3
-        }
-      ],
-      "agePrices": [
-        {
-          "ageId": "cf7abddadd584ee0a42e",
-          "ageLabel": "0-3 Months",
-          "minMonths": 0,
-          "maxMonths": 3,
-          "price": 899,
-          "available": true
-        },
-        {
-          "ageId": "38bec3316ee645c9b364",
-          "ageLabel": "3-6 Months",
-          "minMonths": 3,
-          "maxMonths": 6,
-          "price": 899,
-          "available": true
-        },
-        {
-          "ageId": "fc9765f9a1694b2f8cb9",
-          "ageLabel": "6-9 Months",
-          "minMonths": 6,
-          "maxMonths": 9,
-          "price": 899,
-          "available": true
-        }
-      ],
-      "slug": "sweet-bunny-ear-knitted-romper",
-      "createdAt": "2026-10-01T11:01:24.272Z",
-      "updatedAt": "2026-10-01T11:01:24.272Z",
-      "price": 899
+      "createdAt": "2026-10-02T10:00:00.000Z",
+      "updatedAt": "2026-10-02T10:00:00.000Z"
     },
-    "670e7b7ff5b04ebd8562": {
-      "name": "Bear Hug Cozy Fleece Romper",
+    "11afdf57624d4fff8c69": {
+      "id": "11afdf57624d4fff8c69",
+      "name": "z_test",
+      "slug": "z_test",
       "category": "girls",
-      "dressType": "Partywear",
-      "collection": "Party & Festive Sparkle",
-      "description": "Whimsical meadow-patterned floating gown with satin waistband ribbon and detachable pearl rosette pin. An enchanting choice for festive occasions, cake smashes, and milestones.",
-      "availability": "limited",
-      "featured": true,
+      "description": "",
+      "dressType": "Girls Outfit",
+      "collection": "Girls Collection",
+      "price": 566,
+      "startingPrice": "₹566",
+      "ageGroup": "2-3yr",
+      "availableAges": [
+        "2-3yr",
+        "3-4yr",
+        "4-5yr"
+      ],
+      "whatsappNumber": "",
+      "availability": "available",
       "images": [
         {
-          "url": "/images/products/girl-floral-dream.jpg",
+          "url": "https://firebasestorage.googleapis.com/v0/b/little-placket.firebasestorage.app/o/outfits%2F1790932815730_3_870dbcc9-394b-475a-9965-09b39f72b9f5.webp?alt=media&token=0e9b5ddf-b58b-4a4a-be44-784a3976de57",
+          "publicId": "1790932815730_3_870dbcc9-394b-475a-9965-09b39f72b9f5.webp",
           "order": 0
-        },
-        {
-          "url": "/images/products/girl-angel-frock.jpg",
-          "order": 1
-        },
-        {
-          "url": "/images/products/girl-blossom-dress.jpg",
-          "order": 2
-        },
-        {
-          "url": "/images/products/girl-bunny-romper.jpg",
-          "order": 3
         }
       ],
-      "agePrices": [
-        {
-          "ageId": "fc9765f9a1694b2f8cb9",
-          "ageLabel": "6-9 Months",
-          "minMonths": 6,
-          "maxMonths": 9,
-          "price": 1699,
-          "available": true
-        },
-        {
-          "ageId": "c0b830f5c3fe488aa8cf",
-          "ageLabel": "9-12 Months",
-          "minMonths": 9,
-          "maxMonths": 12,
-          "price": 1699,
-          "available": true
-        },
-        {
-          "ageId": "3fa1ba47641240fb8c02",
-          "ageLabel": "12-18 Months",
-          "minMonths": 12,
-          "maxMonths": 18,
-          "price": 1699,
-          "available": true
-        },
-        {
-          "ageId": "c3c94950acce41e999ef",
-          "ageLabel": "18-24 Months",
-          "minMonths": 18,
-          "maxMonths": 24,
-          "price": 1699,
-          "available": true
-        },
-        {
-          "ageId": "4a2b7e1140fe4be0bcba",
-          "ageLabel": "2-3 Years",
-          "minMonths": 24,
-          "maxMonths": 36,
-          "price": 1699,
-          "available": false
-        }
-      ],
-      "slug": "bear-hug-cozy-fleece-romper",
-      "createdAt": "2026-10-01T11:01:24.273Z",
-      "updatedAt": "2026-10-01T11:55:28.939Z",
-      "price": 1599,
-      "id": "670e7b7ff5b04ebd8562"
+      "createdAt": "2026-10-02T09:20:30.716Z",
+      "updatedAt": "2026-10-02T09:20:30.716Z"
     }
   },
   "ages": {
-    "cf7abddadd584ee0a42e": {
-      "label": "0-3 Months",
+    "age_0_2": {
+      "id": "age_0_2",
+      "label": "0–2 Y",
       "minMonths": 0,
-      "maxMonths": 3,
-      "sortOrder": 1,
-      "active": true,
-      "createdAt": "2026-10-01T11:01:24.265Z",
-      "updatedAt": "2026-10-01T11:01:24.265Z"
-    },
-    "38bec3316ee645c9b364": {
-      "label": "3-6 Months",
-      "minMonths": 3,
-      "maxMonths": 6,
-      "sortOrder": 2,
-      "active": true,
-      "createdAt": "2026-10-01T11:01:24.266Z",
-      "updatedAt": "2026-10-01T11:01:24.266Z"
-    },
-    "fc9765f9a1694b2f8cb9": {
-      "label": "6-9 Months",
-      "minMonths": 6,
-      "maxMonths": 9,
-      "sortOrder": 3,
-      "active": true,
-      "createdAt": "2026-10-01T11:01:24.266Z",
-      "updatedAt": "2026-10-01T11:01:24.266Z"
-    },
-    "c0b830f5c3fe488aa8cf": {
-      "label": "9-12 Months",
-      "minMonths": 9,
-      "maxMonths": 12,
-      "sortOrder": 4,
-      "active": true,
-      "createdAt": "2026-10-01T11:01:24.266Z",
-      "updatedAt": "2026-10-01T11:01:24.266Z"
-    },
-    "3fa1ba47641240fb8c02": {
-      "label": "12-18 Months",
-      "minMonths": 12,
-      "maxMonths": 18,
-      "sortOrder": 5,
-      "active": true,
-      "createdAt": "2026-10-01T11:01:24.267Z",
-      "updatedAt": "2026-10-01T11:01:24.267Z"
-    },
-    "c3c94950acce41e999ef": {
-      "label": "18-24 Months",
-      "minMonths": 18,
       "maxMonths": 24,
-      "sortOrder": 6,
-      "active": true,
-      "createdAt": "2026-10-01T11:01:24.267Z",
-      "updatedAt": "2026-10-01T11:01:24.267Z"
+      "sortOrder": 1,
+      "active": true
     },
-    "4a2b7e1140fe4be0bcba": {
-      "label": "2-3 Years",
-      "minMonths": 24,
-      "maxMonths": 36,
-      "sortOrder": 7,
-      "active": true,
-      "createdAt": "2026-10-01T11:01:24.268Z",
-      "updatedAt": "2026-10-01T11:01:24.268Z"
+    "age_3_5": {
+      "id": "age_3_5",
+      "label": "3–5 Y",
+      "minMonths": 36,
+      "maxMonths": 60,
+      "sortOrder": 2,
+      "active": true
+    },
+    "age_6_8": {
+      "id": "age_6_8",
+      "label": "6–8 Y",
+      "minMonths": 72,
+      "maxMonths": 96,
+      "sortOrder": 3,
+      "active": true
+    },
+    "age_9_12": {
+      "id": "age_9_12",
+      "label": "9–12 Y",
+      "minMonths": 108,
+      "maxMonths": 144,
+      "sortOrder": 4,
+      "active": true
+    },
+    "age_13_14": {
+      "id": "age_13_14",
+      "label": "13–14 Y",
+      "minMonths": 156,
+      "maxMonths": 168,
+      "sortOrder": 5,
+      "active": true
     }
   },
   "collections": {
-    "b2becbf9e3354f65b899": {
+    "col_newborn": {
+      "id": "col_newborn",
       "name": "Newborn Essentials",
       "description": "Ultra-soft, organic, and gentle everyday basics for delicate newborn skin.",
       "active": true,
-      "slug": "newborn-essentials",
-      "createdAt": "2026-10-01T11:01:24.268Z",
-      "updatedAt": "2026-10-01T11:01:24.268Z"
+      "slug": "newborn-essentials"
     },
-    "a20c748eb9ea4e96951e": {
+    "col_party": {
+      "id": "col_party",
       "name": "Party & Festive Sparkle",
       "description": "Heirloom quality celebration dresses, tuxedos, and ornate partywear.",
       "active": true,
-      "slug": "party-and-festive-sparkle",
-      "createdAt": "2026-10-01T11:01:24.268Z",
-      "updatedAt": "2026-10-01T11:01:24.268Z"
+      "slug": "party-and-festive-sparkle"
     },
-    "cf4169c6170d406087bd": {
+    "col_playtime": {
+      "id": "col_playtime",
       "name": "Playtime Rompers & Sets",
       "description": "Flexible, breathable, and adorable everyday playsuits and sets.",
       "active": true,
-      "slug": "playtime-rompers-and-sets",
-      "createdAt": "2026-10-01T11:01:24.269Z",
-      "updatedAt": "2026-10-01T11:01:24.269Z"
+      "slug": "playtime-rompers-and-sets"
     },
-    "01043791293f4bca894f": {
+    "col_summer": {
+      "id": "col_summer",
       "name": "Sunny Days & Summer Fun",
       "description": "Airy linen and cotton ensembles crafted for warm and bright adventures.",
       "active": true,
-      "slug": "sunny-days-and-summer-fun",
-      "createdAt": "2026-10-01T11:01:24.269Z",
-      "updatedAt": "2026-10-01T11:01:24.269Z"
+      "slug": "sunny-days-and-summer-fun"
     }
   },
   "settings": {
     "business": {
-      "businessName": "Kiddy Closet",
-      "whatsappNumber": "919876543210",
-      "email": "hello@kiddycloset.com",
+      "businessName": "THE LITTLE PLACKET",
+      "tagline": "LITTLE OUTFITS FOR BIG ADVENTURES",
+      "heroHeadlineLittle": "The",
+      "heroHeadlineStyles": "Little",
+      "heroHeadlineBigSmiles": "Placket",
+      "heroSupportingText": "Little outfits for big adventures.",
+      "heroImage": "/images/the-little-placket-banner.png",
+      "boysCardTitle": "BOYS",
+      "boysCardSubtitle": "Collection",
+      "boysCardDescription": "Trendy outfits for every occasion",
+      "boysCardImage": "/images/products/boy-check-shirt.jpg",
+      "girlsCardTitle": "GIRLS",
+      "girlsCardSubtitle": "Collection",
+      "girlsCardDescription": "Pretty outfits for every little star",
+      "girlsCardImage": "/images/products/girl-floral-bow-frock.jpg",
+      "quickCard1Title": "NEW ARRIVALS",
+      "quickCard1Desc": "Fresh 2026 Styles",
+      "quickCard2Title": "BEST SELLERS",
+      "quickCard2Desc": "Loved by Parents",
+      "quickCard3Title": "OFFERS",
+      "quickCard3Desc": "Special Boutique Bundles",
+      "whatsappNumber": "9876543210",
+      "email": "hello@thelittleplacket.com",
       "phone": "+91 98765 43210",
-      "instagramUrl": "https://instagram.com/kiddycloset",
-      "facebookUrl": "https://facebook.com/kiddycloset",
+      "instagramUrl": "https://instagram.com/thelittleplacket",
+      "facebookUrl": "https://facebook.com/thelittleplacket",
       "address": "Shop 14, Lilac Arcade, Blossom Street, Bandra West, Mumbai 400050",
-      "logoUrl": "/images/logo.png",
+      "logoUrl": "/images/the-little-placket-banner.png",
       "faviconUrl": "/favicon.ico",
-      "heroImages": [
-        "/images/hero-banner.jpg"
-      ],
-      "homepageContent": "Handcrafted luxury baby fashion designed with love, organic cotton, and timeless silhouettes.",
-      "footerContent": "© 2026 Kiddy Closet. Little Styles, Big Smiles. All rights reserved.",
-      "updatedAt": "2026-10-01T11:01:24.269Z"
+      "announcementText": "✨ Exclusive Catalogue Platform — Handcrafted Kids & Baby Outfits — Direct WhatsApp Assistance",
+      "footerContent": "© 2026 THE LITTLE PLACKET. Little Outfits for Big Adventures. All rights reserved.",
+      "updatedAt": "2026-10-02T10:12:35.702Z"
     }
   },
   "admins": {
-    "5b1e936427454661b5c2": {
-      "email": "admin@kiddycloset.com",
-      "password": "$2a$10$KYiOjiUqobR6AdIlvGFAme7pIQfKik/XtNja5RYZa1eUfH/0rk75m",
-      "name": "Kiddy Closet Admin",
+    "admin_main": {
+      "email": "admin@littleplacket.com",
+      "password": "$2a$10$bYrbCElquSsq78xWqO1DMev2XcFQH25K1wAn0JU0rloFKdDs7Ks6i",
+      "name": "Little Placket Admin",
       "role": "superadmin",
-      "createdAt": "2026-10-01T11:01:24.265Z"
+      "createdAt": "2026-10-02T16:22:00.000Z"
     }
   }
 }

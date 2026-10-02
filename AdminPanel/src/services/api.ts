@@ -5,8 +5,17 @@ import {
   BusinessSettings,
   AdminUser,
 } from '../types';
+import {
+  uploadToFirebaseStorage,
+  syncProductToFirebase,
+  deleteProductFromFirebase,
+  syncSettingsToFirebase,
+  verifyFirebaseAdmin,
+  syncAdminToFirebase,
+} from './firebaseService';
 
 const API_BASE = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3000/api';
+
 
 class ApiService {
   private token: string | null = null;
@@ -59,6 +68,33 @@ class ApiService {
 
   // Auth
   async login(email: string, password: string): Promise<{ token: string; admin: AdminUser }> {
+    // 1. Sync & Verify through Firebase Firestore / Realtime Database
+    try {
+      const fbRes = await verifyFirebaseAdmin(email, password);
+      if (fbRes.success) {
+        try {
+          const res = await this.request('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ email, password }),
+          });
+          this.setToken(res.data.token);
+          return res.data;
+        } catch (e) {
+          const fallbackToken = 'fb_admin_session_' + Date.now();
+          this.setToken(fallbackToken);
+          return {
+            token: fallbackToken,
+            admin: fbRes.admin,
+          };
+        }
+      }
+    } catch (fbErr: any) {
+      if (fbErr.message === 'Invalid email or password') {
+        throw fbErr;
+      }
+      console.warn('Firebase login verification fallback:', fbErr);
+    }
+
     const res = await this.request('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
@@ -99,7 +135,13 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify(product),
     });
-    return res.data;
+    const created = res.data;
+    try {
+      await syncProductToFirebase(created);
+    } catch (fbErr) {
+      console.warn('Firebase sync warning:', fbErr);
+    }
+    return created;
   }
 
   async updateProduct(id: string, product: Partial<Product>): Promise<Product> {
@@ -107,25 +149,60 @@ class ApiService {
       method: 'PUT',
       body: JSON.stringify(product),
     });
-    return res.data;
+    const updated = res.data;
+    try {
+      await syncProductToFirebase(updated);
+    } catch (fbErr) {
+      console.warn('Firebase sync warning:', fbErr);
+    }
+    return updated;
   }
 
   async deleteProduct(id: string): Promise<void> {
+    let product: Product | null = null;
+    try {
+      product = await this.getProductById(id);
+    } catch (e) {}
+
     await this.request(`/products/${id}`, {
       method: 'DELETE',
     });
+    try {
+      await deleteProductFromFirebase(id, product?.images);
+    } catch (fbErr) {
+      console.warn('Firebase delete sync warning:', fbErr);
+    }
   }
 
-  // Image Upload
+  // Image Upload using Firebase Storage
   async uploadImage(file: File): Promise<{ url: string; storagePath: string; publicId: string }> {
-    const formData = new FormData();
-    formData.append('image', file);
-    const res = await this.request('/products/upload/image', {
-      method: 'POST',
-      body: formData,
-    });
-    return res.data;
+    try {
+      // 1. Primary: Upload to Firebase Storage bucket (little-placket.firebasestorage.app)
+      const fbRes = await uploadToFirebaseStorage(file);
+      // Also upload to local server for local redundancy
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+        await this.request('/products/upload/image', {
+          method: 'POST',
+          body: formData,
+        });
+      } catch (e) {
+        // local backend fallback ignore if offline
+      }
+      return fbRes;
+    } catch (err) {
+      console.warn('Firebase storage upload fallback to local backend:', err);
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await this.request('/products/upload/image', {
+        method: 'POST',
+        body: formData,
+      });
+      return res.data;
+    }
   }
+
 
   // Ages CRUD
   async getAges(): Promise<AgeOption[]> {
@@ -194,6 +271,13 @@ class ApiService {
       method: 'PUT',
       body: JSON.stringify(settings),
     });
+
+    try {
+      await syncSettingsToFirebase(res.data || settings);
+    } catch (firebaseErr) {
+      console.warn('Firebase settings sync warning:', firebaseErr);
+    }
+
     return res.data;
   }
 }

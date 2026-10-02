@@ -10,8 +10,8 @@ A complete, production-ready baby clothing boutique catalogue platform. Designed
 
 ```
 kidz/
-├── AdminPanel/     # React Native Web Admin Management Panel (Port 3001)
-├── Frontend/       # Next.js 14 Customer Catalogue Website + Integrated REST API (Port 3000)
+├── AdminPanel/     # React Native Web + Vite Admin Management Panel (Port 3001)
+├── Frontend/       # React JS + Vite Customer Boutique Catalogue & Integrated REST API (Port 3000)
 └── package.json    # Root scripts for launching AdminPanel & Frontend
 ```
 

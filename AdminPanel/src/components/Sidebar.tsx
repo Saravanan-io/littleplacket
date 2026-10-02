@@ -1,5 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
+import {
+  LayoutDashboard,
+  Shirt,
+  PlusCircle,
+  MessageCircle,
+  ExternalLink,
+  LogOut,
+} from 'lucide-react';
 import { ScreenName } from '../types';
 
 interface SidebarProps {
@@ -13,42 +21,86 @@ export default function Sidebar({
   onNavigate,
   onLogout,
 }: SidebarProps) {
-  const navItems: Array<{ screen: ScreenName; label: string; icon: string }> = [
-    { screen: 'dashboard', label: 'Dashboard', icon: '📊' },
-    { screen: 'products', label: 'All Outfits', icon: '👗' },
-    { screen: 'product-add', label: '+ Add Outfit', icon: '✨' },
-    { screen: 'ages', label: 'Age Brackets', icon: '📏' },
-    { screen: 'collections', label: 'Collections', icon: '🎀' },
-    { screen: 'settings', label: 'WhatsApp / Settings', icon: '⚙️' },
+  const { width } = useWindowDimensions();
+  const isMobile = width < 768;
+
+  // On mobile screens, desktop sidebar is hidden because MobileBottomBar handles navigation
+  if (isMobile) {
+    return null;
+  }
+
+  const navItems = [
+    {
+      screen: 'dashboard' as ScreenName,
+      label: 'Dashboard',
+      icon: LayoutDashboard,
+      color: '#3B82F6',
+    },
+    {
+      screen: 'products' as ScreenName,
+      label: 'All Outfits',
+      icon: Shirt,
+      color: '#EC4899',
+    },
+    {
+      screen: 'product-add' as ScreenName,
+      label: 'Add Outfit',
+      icon: PlusCircle,
+      color: '#8B5CF6',
+    },
+    {
+      screen: 'settings' as ScreenName,
+      label: 'WhatsApp Number',
+      icon: MessageCircle,
+      color: '#10B981',
+    },
   ];
 
   return (
     <View style={styles.sidebar}>
       {/* Brand Header */}
       <View style={styles.brandContainer}>
-        <View style={styles.brandIconBox}>
-          <Text style={styles.brandEmoji}>🧸</Text>
+        <View style={styles.brandLogoBox}>
+          <Image
+            source={{ uri: '/images/logo.png' }}
+            style={styles.brandLogoImg}
+            resizeMode="contain"
+          />
         </View>
-        <View>
-          <Text style={styles.brandTitle}>KIDDY CLOSET</Text>
-          <Text style={styles.brandSubtitle}>Admin Hub</Text>
+        <View style={styles.brandTextWrapper}>
+          <Text style={styles.brandTitle}>THE LITTLE PLACKET</Text>
+          <Text style={styles.brandSubtitle}>Baby Boutique Admin</Text>
         </View>
       </View>
 
       {/* Navigation List */}
       <View style={styles.navSection}>
+        <Text style={styles.navHeaderTitle}>CATALOGUE CONTROL</Text>
         {navItems.map((item) => {
           const isActive =
             currentScreen === item.screen ||
             (currentScreen === 'product-edit' && item.screen === 'products');
+          const IconComp = item.icon;
 
           return (
             <TouchableOpacity
               key={item.screen}
               style={[styles.navItem, isActive && styles.navItemActive]}
               onPress={() => onNavigate(item.screen)}
+              activeOpacity={0.7}
             >
-              <Text style={styles.navIcon}>{item.icon}</Text>
+              <View
+                style={[
+                  styles.iconBadge,
+                  isActive ? styles.iconBadgeActive : { backgroundColor: '#F3F4F6' },
+                ]}
+              >
+                <IconComp
+                  size={18}
+                  color={isActive ? '#FFFFFF' : '#4B5563'}
+                  strokeWidth={2.2}
+                />
+              </View>
               <Text style={[styles.navLabel, isActive && styles.navLabelActive]}>
                 {item.label}
               </Text>
@@ -57,16 +109,19 @@ export default function Sidebar({
         })}
       </View>
 
-      {/* External Catalogue Link */}
+      {/* Footer Section */}
       <View style={styles.footerSection}>
         <TouchableOpacity
           style={styles.externalLink}
           onPress={() => window.open('http://localhost:3000', '_blank')}
+          activeOpacity={0.8}
         >
-          <Text style={styles.externalLinkText}>↗ View Customer Catalogue</Text>
+          <ExternalLink size={16} color="#2563EB" strokeWidth={2.2} />
+          <Text style={styles.externalLinkText}>View Store Frontend</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.logoutBtn} onPress={onLogout}>
+        <TouchableOpacity style={styles.logoutBtn} onPress={onLogout} activeOpacity={0.8}>
+          <LogOut size={16} color="#EF4444" strokeWidth={2.2} />
           <Text style={styles.logoutText}>Log Out</Text>
         </TouchableOpacity>
       </View>
@@ -76,10 +131,10 @@ export default function Sidebar({
 
 const styles = StyleSheet.create({
   sidebar: {
-    width: 250,
+    width: 260,
     backgroundColor: '#FFFFFF',
     borderRightWidth: 1,
-    borderRightColor: '#E5E7EB',
+    borderRightColor: '#E2E8F0',
     padding: 20,
     justifyContent: 'space-between',
     minHeight: '100%',
@@ -88,89 +143,120 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    paddingBottom: 24,
+    paddingBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: '#F1F5F9',
   },
-  brandIconBox: {
-    width: 44,
-    height: 44,
+  brandLogoBox: {
+    width: 46,
+    height: 46,
     borderRadius: 14,
-    backgroundColor: '#FDF2F8',
+    backgroundColor: '#FFF5F7',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#FBCFE8',
+    borderColor: '#FCE7F3',
+    padding: 4,
   },
-  brandEmoji: {
-    fontSize: 22,
+  brandLogoImg: {
+    width: '100%',
+    height: '100%',
+  },
+  brandTextWrapper: {
+    flex: 1,
   },
   brandTitle: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#1C1E24',
+    fontSize: 12,
+    fontWeight: '900',
+    color: '#0F172A',
     letterSpacing: 0.5,
   },
   brandSubtitle: {
     fontSize: 11,
-    color: '#858FA8',
-    fontWeight: '600',
-    textTransform: 'uppercase',
+    color: '#EC4899',
+    fontWeight: '700',
+    marginTop: 2,
   },
   navSection: {
+    marginTop: 24,
+    gap: 8,
     flex: 1,
-    paddingTop: 20,
-    gap: 6,
+  },
+  navHeaderTitle: {
+    fontSize: 10,
+    fontWeight: '800',
+    color: '#94A3B8',
+    letterSpacing: 0.8,
+    marginBottom: 8,
+    paddingLeft: 6,
   },
   navItem: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 14,
     gap: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 11,
-    borderRadius: 12,
   },
   navItemActive: {
-    backgroundColor: '#1C1E24',
+    backgroundColor: '#1E293B',
   },
-  navIcon: {
-    fontSize: 16,
+  iconBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconBadgeActive: {
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
   },
   navLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#4B5563',
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#475569',
   },
   navLabelActive: {
     color: '#FFFFFF',
-    fontWeight: '700',
   },
   footerSection: {
-    paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: '#F3F4F6',
+    borderTopColor: '#F1F5F9',
+    paddingTop: 16,
     gap: 10,
   },
   externalLink: {
-    backgroundColor: '#F9FAFB',
-    padding: 10,
-    borderRadius: 10,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#EFF6FF',
+    paddingVertical: 11,
+    paddingHorizontal: 14,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#BFDBFE',
   },
   externalLinkText: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '700',
-    color: '#3B82F6',
+    color: '#1D4ED8',
   },
   logoutBtn: {
-    padding: 10,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#FEF2F2',
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#FCA5A5',
   },
   logoutText: {
     fontSize: 12,
-    fontWeight: '600',
-    color: '#9CA3AF',
+    fontWeight: '700',
+    color: '#DC2626',
   },
 });

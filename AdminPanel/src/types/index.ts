@@ -17,6 +17,12 @@ export interface ProductImage {
   storagePath?: string;
 }
 
+export interface ProductColor {
+  name: string;
+  hex: string;
+  thumbnail?: string;
+}
+
 export interface Product {
   id: string;
   _id?: string;
@@ -26,13 +32,21 @@ export interface Product {
   description: string;
   dressType: string;
   collection: string;
+  price: number;
+  startingPrice?: string;
+  sizes?: string[];
+  ageGroup?: string;
+  availableAges?: string[]; // e.g. ["2-3yr", "3-4yr", "4-5yr", "5-6yr", "6-7yr", "7-8yr", "8-9yr", "9-10yr", "10-11yr", "11-12yr"]
+  whatsappNumber?: string;
+  colors?: (string | ProductColor)[];
   images: ProductImage[];
-  agePrices: AgePriceEntry[];
+  agePrices?: AgePriceEntry[];
   availability: Availability;
-  featured: boolean;
+  featured?: boolean;
   createdAt: string;
   updatedAt: string;
 }
+
 
 export interface AgeOption {
   id: string;
@@ -53,6 +67,7 @@ export interface Collection {
 
 export interface BusinessSettings {
   businessName: string;
+  tagline?: string;
   whatsappNumber: string;
   email: string;
   phone: string;
@@ -61,9 +76,30 @@ export interface BusinessSettings {
   address: string;
   logoUrl?: string;
   faviconUrl?: string;
+  heroHeadlineLittle?: string;
+  heroHeadlineStyles?: string;
+  heroHeadlineBigSmiles?: string;
+  heroSupportingText?: string;
+  heroImage?: string;
   heroImages?: string[];
+  boysCardTitle?: string;
+  boysCardSubtitle?: string;
+  boysCardDescription?: string;
+  boysCardImage?: string;
+  girlsCardTitle?: string;
+  girlsCardSubtitle?: string;
+  girlsCardDescription?: string;
+  girlsCardImage?: string;
+  quickCard1Title?: string;
+  quickCard1Desc?: string;
+  quickCard2Title?: string;
+  quickCard2Desc?: string;
+  quickCard3Title?: string;
+  quickCard3Desc?: string;
+  announcementText?: string;
   homepageContent?: string;
   footerContent?: string;
+  updatedAt?: string;
 }
 
 export interface AdminUser {

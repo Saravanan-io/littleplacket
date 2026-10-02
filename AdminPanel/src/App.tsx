@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, useWindowDimensions } from 'react-native';
 import { api } from './services/api';
 import { AdminUser, ScreenName } from './types';
 
@@ -15,8 +15,12 @@ import SettingsScreen from './screens/SettingsScreen';
 // Layout components
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
+import MobileBottomBar from './components/MobileBottomBar';
 
 export default function App() {
+  const { width } = useWindowDimensions();
+  const isMobile = width < 768;
+
   const [admin, setAdmin] = useState<AdminUser | null>(null);
   const [loadingAuth, setLoadingAuth] = useState(true);
   const [currentScreen, setCurrentScreen] = useState<ScreenName>('dashboard');
@@ -94,20 +98,31 @@ export default function App() {
   };
 
   return (
-    <View style={styles.appContainer}>
-      <Sidebar
-        currentScreen={currentScreen}
-        onNavigate={handleNavigate}
-        onLogout={handleLogout}
-      />
+    <View style={[styles.appContainer, isMobile && styles.appContainerMobile]}>
+      {!isMobile && (
+        <Sidebar
+          currentScreen={currentScreen}
+          onNavigate={handleNavigate}
+          onLogout={handleLogout}
+        />
+      )}
       <View style={styles.mainWrapper}>
         <Header
           currentScreen={currentScreen}
           admin={admin}
           onLogout={handleLogout}
         />
-        <View style={styles.screenWrapper}>{renderScreen()}</View>
+        <View style={[styles.screenWrapper, isMobile && styles.screenWrapperMobile]}>
+          {renderScreen()}
+        </View>
       </View>
+
+      {isMobile && (
+        <MobileBottomBar
+          currentScreen={currentScreen}
+          onNavigate={handleNavigate}
+        />
+      )}
     </View>
   );
 }
@@ -125,6 +140,10 @@ const styles = StyleSheet.create({
     height: '100%',
     backgroundColor: '#F8F9FA',
   },
+  appContainerMobile: {
+    flexDirection: 'column',
+    position: 'relative',
+  },
   mainWrapper: {
     flex: 1,
     height: '100%',
@@ -134,5 +153,8 @@ const styles = StyleSheet.create({
   screenWrapper: {
     flex: 1,
     overflow: 'hidden',
+  },
+  screenWrapperMobile: {
+    paddingBottom: 64,
   },
 });

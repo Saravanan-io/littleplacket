@@ -7,7 +7,18 @@ import {
   ScrollView,
   ActivityIndicator,
   Image,
+  useWindowDimensions,
 } from 'react-native';
+import {
+  Shirt,
+  Baby,
+  Heart,
+  PlusCircle,
+  Pencil,
+  ArrowRight,
+  Sparkles,
+  ShoppingBag,
+} from 'lucide-react';
 import { api } from '../services/api';
 import { Product, ScreenName } from '../types';
 
@@ -16,6 +27,9 @@ interface DashboardScreenProps {
 }
 
 export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
+  const { width } = useWindowDimensions();
+  const isMobile = width < 768;
+
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any>({
     total: 0,
@@ -47,131 +61,167 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
   if (loading) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator size="large" color="#2A2E39" />
+        <ActivityIndicator size="large" color="#7C3AED" />
         <Text style={styles.loadingText}>Loading Dashboard Data...</Text>
       </View>
     );
   }
 
+  const totalCount = stats.total || stats.totalProducts || recentProducts.length || 0;
+  const boysCount = stats.boys || stats.boysCount || 0;
+  const girlsCount = stats.girls || stats.girlsCount || 0;
+
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Welcome Banner */}
-      <View style={styles.welcomeCard}>
-        <View>
-          <Text style={styles.welcomeTitle}>Welcome back, Admin 👋</Text>
-          <Text style={styles.welcomeSubtitle}>
-            Here is your catalogue overview, outfit counts, and live stock statuses.
-          </Text>
-        </View>
-        <TouchableOpacity
-          style={styles.primaryBtn}
-          onPress={() => onNavigate('product-add')}
-        >
-          <Text style={styles.primaryBtnText}>+ Add New Outfit</Text>
-        </TouchableOpacity>
-      </View>
+    <ScrollView style={styles.container} contentContainerStyle={[styles.content, isMobile && styles.contentMobile]}>
+      {/* Brand Header Section with Store Image Logo */}
+      <View style={[styles.brandHeaderCard, isMobile && styles.brandHeaderCardMobile]}>
+        <Image
+          source={{ uri: '/images/the-little-placket-banner.png' }}
+          style={styles.headerLogoImg}
+          resizeMode="contain"
+        />
 
-      {/* KPI Cards Grid */}
-      <View style={styles.kpiGrid}>
-        <View style={[styles.kpiCard, { borderLeftColor: '#3A86FF' }]}>
-          <Text style={styles.kpiLabel}>Total Outfits</Text>
-          <Text style={styles.kpiValue}>{stats.total}</Text>
-          <Text style={styles.kpiSub}>In Catalogue</Text>
-        </View>
-
-        <View style={[styles.kpiCard, { borderLeftColor: '#60A5FA' }]}>
-          <Text style={styles.kpiLabel}>Baby Boys</Text>
-          <Text style={styles.kpiValue}>{stats.boys}</Text>
-          <Text style={styles.kpiSub}>Rompers & Suits</Text>
-        </View>
-
-        <View style={[styles.kpiCard, { borderLeftColor: '#FB6F92' }]}>
-          <Text style={styles.kpiLabel}>Baby Girls</Text>
-          <Text style={styles.kpiValue}>{stats.girls}</Text>
-          <Text style={styles.kpiSub}>Frocks & Gowns</Text>
-        </View>
-
-        <View style={[styles.kpiCard, { borderLeftColor: '#10B981' }]}>
-          <Text style={styles.kpiLabel}>Available Now</Text>
-          <Text style={styles.kpiValue}>{stats.available}</Text>
-          <Text style={styles.kpiSub}>Ready for Enquiry</Text>
-        </View>
-      </View>
-
-      {/* Quick Navigation Cards */}
-      <View style={styles.quickNavSection}>
-        <Text style={styles.sectionTitle}>Catalogue Management</Text>
-        <View style={styles.quickNavGrid}>
+        <View style={styles.headerActions}>
           <TouchableOpacity
-            style={styles.navCard}
+            style={styles.primaryAddBtn}
+            onPress={() => onNavigate('product-add')}
+            activeOpacity={0.85}
+          >
+            <PlusCircle size={18} color="#FFFFFF" strokeWidth={2.5} />
+            <Text style={styles.primaryAddBtnText}>Add New Baby Outfit</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.secondaryCatalogueBtn}
             onPress={() => onNavigate('products')}
+            activeOpacity={0.85}
           >
-            <Text style={styles.navCardIcon}>👗</Text>
-            <Text style={styles.navCardTitle}>All Products</Text>
-            <Text style={styles.navCardDesc}>View, edit, search, and update outfits</Text>
+            <ShoppingBag size={16} color="#0F172A" strokeWidth={2.2} />
+            <Text style={styles.secondaryCatalogueBtnText}>View Catalogue ({totalCount})</Text>
           </TouchableOpacity>
+        </View>
+      </View>
 
-          <TouchableOpacity
-            style={styles.navCard}
-            onPress={() => onNavigate('ages')}
-          >
-            <Text style={styles.navCardIcon}>📏</Text>
-            <Text style={styles.navCardTitle}>Age Brackets</Text>
-            <Text style={styles.navCardDesc}>Manage 0-3M, 3-6M, and sizing ranges</Text>
-          </TouchableOpacity>
+      {/* Modern Baby KPI Cards Grid */}
+      <View style={styles.kpiGrid}>
+        {/* Total Outfits Card */}
+        <View style={[styles.kpiCard, styles.kpiCardTotal, isMobile && styles.kpiCardMobile]}>
+          <View style={styles.kpiHeaderRow}>
+            <View style={[styles.kpiIconBox, { backgroundColor: '#EDE9FE', borderColor: '#DDD6FE' }]}>
+              <Shirt size={22} color="#7C3AED" strokeWidth={2.2} />
+            </View>
+            <View style={[styles.kpiPillBadge, { backgroundColor: '#F3E8FF' }]}>
+              <Text style={[styles.kpiPillText, { color: '#6D28D9' }]}>Total Catalogue</Text>
+            </View>
+          </View>
+          <Text style={styles.kpiValue}>{totalCount}</Text>
+          <Text style={styles.kpiLabel}>Total Outfits Available</Text>
+        </View>
 
-          <TouchableOpacity
-            style={styles.navCard}
-            onPress={() => onNavigate('collections')}
-          >
-            <Text style={styles.navCardIcon}>✨</Text>
-            <Text style={styles.navCardTitle}>Collections</Text>
-            <Text style={styles.navCardDesc}>Newborn, Festive, and Summer groupings</Text>
-          </TouchableOpacity>
+        {/* Boys Collection Card */}
+        <View style={[styles.kpiCard, styles.kpiCardBoys, isMobile && styles.kpiCardMobile]}>
+          <View style={styles.kpiHeaderRow}>
+            <View style={[styles.kpiIconBox, { backgroundColor: '#EFF6FF', borderColor: '#BFDBFE' }]}>
+              <Baby size={22} color="#2563EB" strokeWidth={2.2} />
+            </View>
+            <View style={[styles.kpiPillBadge, { backgroundColor: '#DBEAFE' }]}>
+              <Text style={[styles.kpiPillText, { color: '#1E40AF' }]}>Baby Boys</Text>
+            </View>
+          </View>
+          <Text style={styles.kpiValue}>{boysCount}</Text>
+          <Text style={styles.kpiLabel}>Boys Outfits Collection</Text>
+        </View>
 
-          <TouchableOpacity
-            style={styles.navCard}
-            onPress={() => onNavigate('settings')}
-          >
-            <Text style={styles.navCardIcon}>⚙️</Text>
-            <Text style={styles.navCardTitle}>Business Settings</Text>
-            <Text style={styles.navCardDesc}>Update WhatsApp number, address, & phone</Text>
-          </TouchableOpacity>
+        {/* Girls Collection Card */}
+        <View style={[styles.kpiCard, styles.kpiCardGirls, isMobile && styles.kpiCardMobile]}>
+          <View style={styles.kpiHeaderRow}>
+            <View style={[styles.kpiIconBox, { backgroundColor: '#FDF2F8', borderColor: '#FBCFE8' }]}>
+              <Heart size={22} color="#EC4899" strokeWidth={2.2} />
+            </View>
+            <View style={[styles.kpiPillBadge, { backgroundColor: '#FCE7F3' }]}>
+              <Text style={[styles.kpiPillText, { color: '#9D174D' }]}>Baby Girls</Text>
+            </View>
+          </View>
+          <Text style={styles.kpiValue}>{girlsCount}</Text>
+          <Text style={styles.kpiLabel}>Girls Outfits Collection</Text>
         </View>
       </View>
 
       {/* Recent Outfits Table */}
       <View style={styles.recentSection}>
         <View style={styles.recentHeader}>
-          <Text style={styles.sectionTitle}>Recently Added Outfits</Text>
-          <TouchableOpacity onPress={() => onNavigate('products')}>
-            <Text style={styles.viewAllText}>View All Outfits →</Text>
+          <View>
+            <Text style={styles.sectionTitle}>Recently Added Outfits</Text>
+            <Text style={styles.sectionSubtitle}>Quick edit and stock review for recently added items</Text>
+          </View>
+          <TouchableOpacity
+            style={styles.viewAllBtn}
+            onPress={() => onNavigate('products')}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.viewAllText}>View All Outfits</Text>
+            <ArrowRight size={14} color="#2563EB" strokeWidth={2.2} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.tableCard}>
-          {recentProducts.map((product) => (
-            <View key={product.id || product.slug} style={styles.productRow}>
-              <Image
-                source={{ uri: product.images?.[0]?.url || '/images/hero-banner.jpg' }}
-                style={styles.productThumb}
-              />
-              <View style={styles.productInfo}>
-                <Text style={styles.productName}>{product.name}</Text>
-                <Text style={styles.productMeta}>
-                  {product.category === 'boys' ? '👦 Boys' : '👧 Girls'} • {product.dressType || 'Boutique'}
-                </Text>
-              </View>
-              <View style={styles.productActions}>
+          {recentProducts.map((product) => {
+            const isBoys = product.category === 'boys';
+            return (
+              <View key={product.id || product.slug} style={styles.productRow}>
+                <Image
+                  source={{ uri: product.images?.[0]?.url || '/images/hero-banner.jpg' }}
+                  style={styles.productThumb}
+                />
+                <View style={styles.productInfo}>
+                  <Text style={styles.productName}>{product.name}</Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 }}>
+                    <View
+                      style={[
+                        styles.catBadge,
+                        isBoys ? styles.catBadgeBoys : styles.catBadgeGirls,
+                      ]}
+                    >
+                      {isBoys ? (
+                        <Baby size={11} color="#1D4ED8" strokeWidth={2} />
+                      ) : (
+                        <Heart size={11} color="#BE185D" strokeWidth={2} />
+                      )}
+                      <Text
+                        style={[
+                          styles.catBadgeText,
+                          isBoys ? { color: '#1D4ED8' } : { color: '#BE185D' },
+                        ]}
+                      >
+                        {isBoys ? 'Boys Outfit' : 'Girls Outfit'}
+                      </Text>
+                    </View>
+
+                    <Text style={styles.priceTag}>₹{product.price}</Text>
+
+                    {product.availability === 'out_of_stock' ? (
+                      <View style={styles.outStockBadge}>
+                        <Text style={styles.outStockText}>Out of Stock</Text>
+                      </View>
+                    ) : (
+                      <View style={styles.inStockBadge}>
+                        <Text style={styles.inStockText}>In Stock</Text>
+                      </View>
+                    )}
+                  </View>
+                </View>
+
                 <TouchableOpacity
                   style={styles.editBtn}
                   onPress={() => onNavigate('product-edit', { productId: product.id })}
+                  activeOpacity={0.8}
                 >
+                  <Pencil size={14} color="#334155" strokeWidth={2} />
                   <Text style={styles.editBtnText}>Edit</Text>
                 </TouchableOpacity>
               </View>
-            </View>
-          ))}
+            );
+          })}
         </View>
       </View>
     </ScrollView>
@@ -181,190 +231,298 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: '#F8FAFC',
   },
   content: {
-    padding: 24,
-    maxWidth: 1200,
+    padding: 28,
+    maxWidth: 1120,
     width: '100%',
-    alignSelf: 'center',
+    marginHorizontal: 'auto',
+    gap: 24,
   },
   center: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 30,
+    padding: 80,
   },
   loadingText: {
-    marginTop: 12,
+    marginTop: 14,
     fontSize: 14,
-    color: '#5F677D',
-    fontWeight: '600',
+    color: '#64748B',
+    fontWeight: '700',
   },
-  welcomeCard: {
+  brandHeaderCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
-    padding: 24,
-    marginBottom: 24,
+    borderRadius: 22,
+    padding: 22,
+    borderWidth: 1.5,
+    borderColor: '#E2E8F0',
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     flexWrap: 'wrap',
     gap: 16,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
   },
-  welcomeTitle: {
-    fontSize: 22,
-    fontWeight: '800',
-    color: '#1C1E24',
+  brandHeaderCardMobile: {
+    padding: 16,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
-  welcomeSubtitle: {
-    fontSize: 13,
-    color: '#5F677D',
-    marginTop: 4,
+  headerLogoImg: {
+    height: 85,
+    width: 290,
+    maxWidth: '100%' as any,
   },
-  primaryBtn: {
-    backgroundColor: '#1C1E24',
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    flexWrap: 'wrap',
+  },
+  primaryAddBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#7C3AED',
     paddingHorizontal: 20,
     paddingVertical: 12,
     borderRadius: 14,
+    shadowColor: '#7C3AED',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
-  primaryBtnText: {
+  primaryAddBtnText: {
     color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '800',
+  },
+  secondaryCatalogueBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 18,
+    paddingVertical: 12,
+    borderRadius: 14,
+  },
+  secondaryCatalogueBtnText: {
+    color: '#0F172A',
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   kpiGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 16,
-    marginBottom: 28,
+    gap: 18,
   },
   kpiCard: {
     flex: 1,
-    minWidth: 200,
+    minWidth: 260,
     backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderRadius: 18,
-    borderLeftWidth: 4,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderRadius: 20,
+    padding: 22,
+    borderWidth: 1.5,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    elevation: 2,
+    gap: 8,
   },
-  kpiLabel: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#5F677D',
-    textTransform: 'uppercase',
+  kpiCardTotal: {
+    borderColor: '#DDD6FE',
   },
-  kpiValue: {
-    fontSize: 28,
-    fontWeight: '900',
-    color: '#1C1E24',
-    marginVertical: 4,
+  kpiCardBoys: {
+    borderColor: '#BFDBFE',
   },
-  kpiSub: {
-    fontSize: 12,
-    color: '#858FA8',
+  kpiCardGirls: {
+    borderColor: '#FBCFE8',
   },
-  quickNavSection: {
-    marginBottom: 28,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#1C1E24',
-    marginBottom: 14,
-  },
-  quickNavGrid: {
+  kpiHeaderRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 16,
-  },
-  navCard: {
-    flex: 1,
-    minWidth: 220,
-    backgroundColor: '#FFFFFF',
-    padding: 20,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  navCardIcon: {
-    fontSize: 32,
-    marginBottom: 10,
-  },
-  navCardTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#1C1E24',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 4,
   },
-  navCardDesc: {
-    fontSize: 12,
-    color: '#5F677D',
-    lineHeight: 16,
+  kpiIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+  kpiPillBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+  },
+  kpiPillText: {
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  kpiValue: {
+    fontSize: 32,
+    fontWeight: '900',
+    color: '#0F172A',
+    letterSpacing: -1,
+  },
+  kpiLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#64748B',
   },
   recentSection: {
-    marginBottom: 28,
+    gap: 14,
   },
   recentHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    justifyContent: 'space-between',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: '#0F172A',
+  },
+  sectionSubtitle: {
+    fontSize: 12,
+    color: '#64748B',
+    marginTop: 2,
+  },
+  viewAllBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#EFF6FF',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#BFDBFE',
   },
   viewAllText: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: '#3A86FF',
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#2563EB',
   },
   tableCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 18,
+    borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#E2E8F0',
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
   },
   productRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 14,
+    padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: '#F1F5F9',
   },
   productThumb: {
-    width: 48,
-    height: 48,
-    borderRadius: 10,
-    backgroundColor: '#E5E7EB',
-    marginRight: 14,
+    width: 52,
+    height: 52,
+    borderRadius: 14,
+    backgroundColor: '#F1F5F9',
+    marginRight: 16,
   },
   productInfo: {
     flex: 1,
   },
   productName: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: '#1C1E24',
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#0F172A',
   },
-  productMeta: {
+  catBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  catBadgeBoys: {
+    backgroundColor: '#EFF6FF',
+  },
+  catBadgeGirls: {
+    backgroundColor: '#FDF2F8',
+  },
+  catBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  priceTag: {
     fontSize: 12,
-    color: '#858FA8',
-    marginTop: 2,
+    fontWeight: '800',
+    color: '#0F172A',
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
   },
-  productActions: {
-    marginLeft: 12,
+  inStockBadge: {
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  inStockText: {
+    color: '#047857',
+    fontSize: 11,
+    fontWeight: '800',
+  },
+  outStockBadge: {
+    backgroundColor: '#FEF2F2',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  outStockText: {
+    color: '#B91C1C',
+    fontSize: 11,
+    fontWeight: '800',
   },
   editBtn: {
-    backgroundColor: '#F3F4F6',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: '#F1F5F9',
     paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 8,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#CBD5E1',
   },
   editBtnText: {
     fontSize: 12,
     fontWeight: '700',
-    color: '#374151',
+    color: '#334155',
+  },
+  contentMobile: {
+    padding: 14,
+    gap: 16,
+  },
+  welcomeBannerMobile: {
+    padding: 18,
+    borderRadius: 18,
+    minHeight: 150,
+  },
+  kpiCardMobile: {
+    minWidth: '100%' as any,
   },
 });
