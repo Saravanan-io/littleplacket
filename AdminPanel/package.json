@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "vite --port 3001 --host",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "npm run build && firebase deploy --only hosting:little-placket"
   },
   "dependencies": {
     "firebase": "^12.19.0",

@@ -114,3 +114,4 @@ When customers click **"Enquire on WhatsApp"** on any product card or detail pag
   - Works out of the box with file-backed persistence (`data/store.json`) and local static uploads (`/uploads`).
   - Supports Google Cloud / Firebase Firestore & Storage credentials if provided in `.env`.
 - Seed script (`npm run seed`) populating 8 complete sample baby outfits, 7 age brackets, 4 collections, business settings, and superadmin account.
+# littleplacket

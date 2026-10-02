@@ -228,7 +228,7 @@ export default function ProductEditScreen({
         startingPrice: `₹${numPrice}`,
         availableAges: selectedAges,
         ageGroup: selectedAges[0] || '2-3yr',
-        whatsappNumber: whatsappNumber.trim() || undefined,
+        whatsappNumber: whatsappNumber.trim() || '',
         availability,
         images,
         description: '',

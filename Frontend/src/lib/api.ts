@@ -1,9 +1,7 @@
+import { collection, doc, getDocs, getDoc, onSnapshot } from 'firebase/firestore';
+import { ref, get, onValue } from 'firebase/database';
+import { db, rtdb } from './firebase';
 import { Product, AgeOption, Collection, BusinessSettings } from '../types';
-
-const getApiBase = () => {
-  if (typeof window !== 'undefined') return '/api';
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
-};
 
 export const DEFAULT_SETTINGS: BusinessSettings = {
   businessName: 'THE LITTLE PLACKET',
@@ -12,15 +10,15 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
   heroHeadlineStyles: 'Little',
   heroHeadlineBigSmiles: 'Placket',
   heroSupportingText: 'Little outfits for big adventures.',
-  heroImage: '/images/the-little-placket-banner.png',
+  heroImage: '',
   boysCardTitle: 'BOYS',
   boysCardSubtitle: 'Collection',
   boysCardDescription: 'Trendy outfits for every occasion',
-  boysCardImage: '/images/products/boy-check-shirt.jpg',
+  boysCardImage: '',
   girlsCardTitle: 'GIRLS',
   girlsCardSubtitle: 'Collection',
   girlsCardDescription: 'Pretty outfits for every little star',
-  girlsCardImage: '/images/products/girl-floral-bow-frock.jpg',
+  girlsCardImage: '',
   quickCard1Title: 'NEW ARRIVALS',
   quickCard1Desc: 'Fresh 2026 Styles',
   quickCard2Title: 'BEST SELLERS',
@@ -37,54 +35,111 @@ export const DEFAULT_SETTINGS: BusinessSettings = {
   footerContent: '© 2026 THE LITTLE PLACKET. Little Outfits for Big Adventures. All rights reserved.',
 };
 
-async function fetchWithTimeout(url: string, options: RequestInit = {}, timeoutMs = 2500): Promise<Response> {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeoutMs);
+/**
+ * Subscribe to Real-time Product updates from Firebase
+ */
+export function subscribeProducts(callback: (products: Product[]) => void): () => void {
   try {
-    const separator = url.includes('?') ? '&' : '?';
-    const freshUrl = `${url}${separator}_t=${Date.now()}`;
-    const res = await fetch(freshUrl, {
-      ...options,
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        Pragma: 'no-cache',
-        ...(options.headers || {}),
-      },
-      signal: controller.signal,
+    const unsubscribe = onSnapshot(collection(db, 'products'), (snapshot) => {
+      const products: Product[] = snapshot.docs.map((docSnap) => ({
+        ...(docSnap.data() as Product),
+        id: docSnap.id,
+      }));
+      callback(products);
+    }, (err) => {
+      console.warn('Firestore real-time products warning, subscribing to RTDB fallback:', err);
+      onValue(ref(rtdb, 'products'), (rtdbSnap) => {
+        if (rtdbSnap.exists()) {
+          const prods = Object.entries(rtdbSnap.val()).map(([id, p]: [string, any]) => ({ ...p, id }));
+          callback(prods);
+        }
+      });
     });
-    clearTimeout(id);
-    return res;
-  } catch (error) {
-    clearTimeout(id);
-    throw error;
+    return unsubscribe;
+  } catch (err) {
+    return () => {};
+  }
+}
+
+/**
+ * Subscribe to Real-time Settings updates from Firebase
+ */
+export function subscribeSettings(callback: (settings: BusinessSettings) => void): () => void {
+  try {
+    const unsubscribe = onSnapshot(doc(db, 'settings', 'business'), (docSnap) => {
+      if (docSnap.exists()) {
+        callback({ ...DEFAULT_SETTINGS, ...(docSnap.data() as BusinessSettings) });
+      }
+    }, (err) => {
+      console.warn('Firestore real-time settings warning:', err);
+      onValue(ref(rtdb, 'settings/business'), (rtdbSnap) => {
+        if (rtdbSnap.exists()) {
+          callback({ ...DEFAULT_SETTINGS, ...rtdbSnap.val() });
+        }
+      });
+    });
+    return unsubscribe;
+  } catch (err) {
+    return () => {};
   }
 }
 
 export async function fetchProducts(filters: Record<string, any> = {}): Promise<Product[]> {
   try {
-    const params = new URLSearchParams();
-    Object.entries(filters).forEach(([key, val]) => {
-      if (val !== undefined && val !== null && val !== '' && val !== 'all') {
-        params.append(key, String(val));
+    // 1. Fetch from Firestore
+    const snapshot = await getDocs(collection(db, 'products'));
+    let products: Product[] = snapshot.docs.map((docSnap) => ({
+      ...(docSnap.data() as Product),
+      id: docSnap.id,
+    }));
+
+    // 2. Realtime DB fallback if Firestore empty
+    if (!products.length) {
+      const rtdbSnapshot = await get(ref(rtdb, 'products'));
+      if (rtdbSnapshot.exists()) {
+        const data = rtdbSnapshot.val();
+        products = Object.entries(data).map(([id, p]: [string, any]) => ({
+          ...p,
+          id,
+        }));
       }
+    }
+
+    // In-memory filter & sort
+    const { category, availability, onlyAvailable, ageGroup, search, sortBy = 'featured' } = filters;
+
+    if (category && category !== 'all') {
+      products = products.filter((p) => p.category === category);
+    }
+    if (onlyAvailable === 'true' || availability === 'available') {
+      products = products.filter((p) => p.availability === 'available');
+    }
+    if (ageGroup) {
+      products = products.filter((p) => p.availableAges?.includes(ageGroup) || p.ageGroup === ageGroup);
+    }
+    if (search) {
+      const q = search.toLowerCase().trim();
+      products = products.filter((p) => p.name?.toLowerCase().includes(q) || p.dressType?.toLowerCase().includes(q));
+    }
+
+    products.sort((a, b) => {
+      if (sortBy === 'price-asc') return (a.price || 0) - (b.price || 0);
+      if (sortBy === 'price-desc') return (b.price || 0) - (a.price || 0);
+      if (sortBy === 'a-z') return (a.name || '').localeCompare(b.name || '');
+      return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
     });
 
-    const res = await fetchWithTimeout(`${getApiBase()}/products?${params.toString()}`);
-    if (!res.ok) return [];
-    const json = await res.json();
-    return json.data || [];
+    return products;
   } catch (error) {
+    console.warn('fetchProducts Firebase error:', error);
     return [];
   }
 }
 
 export async function fetchProductBySlug(slug: string): Promise<Product | null> {
   try {
-    const res = await fetchWithTimeout(`${getApiBase()}/products/${slug}`);
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json.data || null;
+    const products = await fetchProducts();
+    return products.find((p) => p.slug === slug || p.id === slug) || null;
   } catch (error) {
     return null;
   }
@@ -92,10 +147,11 @@ export async function fetchProductBySlug(slug: string): Promise<Product | null> 
 
 export async function fetchProductById(id: string): Promise<Product | null> {
   try {
-    const res = await fetchWithTimeout(`${getApiBase()}/products/id/${id}`);
-    if (!res.ok) return null;
-    const json = await res.json();
-    return json.data || null;
+    const docSnap = await getDoc(doc(db, 'products', id));
+    if (docSnap.exists()) {
+      return { ...(docSnap.data() as Product), id: docSnap.id };
+    }
+    return null;
   } catch (error) {
     return null;
   }
@@ -103,10 +159,15 @@ export async function fetchProductById(id: string): Promise<Product | null> {
 
 export async function fetchAges(): Promise<AgeOption[]> {
   try {
-    const res = await fetchWithTimeout(`${getApiBase()}/ages?active=true`);
-    if (!res.ok) return [];
-    const json = await res.json();
-    return json.data || [];
+    const snapshot = await getDocs(collection(db, 'ages'));
+    let ages: AgeOption[] = snapshot.docs.map((d) => ({ ...(d.data() as AgeOption), id: d.id }));
+    if (!ages.length) {
+      const rtdbSnap = await get(ref(rtdb, 'ages'));
+      if (rtdbSnap.exists()) {
+        ages = Object.entries(rtdbSnap.val()).map(([id, a]: [string, any]) => ({ ...a, id }));
+      }
+    }
+    return ages.filter((a) => a.active).sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
   } catch (error) {
     return [];
   }
@@ -114,10 +175,15 @@ export async function fetchAges(): Promise<AgeOption[]> {
 
 export async function fetchCollections(): Promise<Collection[]> {
   try {
-    const res = await fetchWithTimeout(`${getApiBase()}/collections?active=true`);
-    if (!res.ok) return [];
-    const json = await res.json();
-    return json.data || [];
+    const snapshot = await getDocs(collection(db, 'collections'));
+    let cols: Collection[] = snapshot.docs.map((d) => ({ ...(d.data() as Collection), id: d.id }));
+    if (!cols.length) {
+      const rtdbSnap = await get(ref(rtdb, 'collections'));
+      if (rtdbSnap.exists()) {
+        cols = Object.entries(rtdbSnap.val()).map(([id, c]: [string, any]) => ({ ...c, id }));
+      }
+    }
+    return cols.filter((c) => c.active);
   } catch (error) {
     return [];
   }
@@ -125,10 +191,15 @@ export async function fetchCollections(): Promise<Collection[]> {
 
 export async function fetchSettings(): Promise<BusinessSettings> {
   try {
-    const res = await fetchWithTimeout(`${getApiBase()}/settings`);
-    if (!res.ok) return DEFAULT_SETTINGS;
-    const json = await res.json();
-    return { ...DEFAULT_SETTINGS, ...(json.data || {}) };
+    const docSnap = await getDoc(doc(db, 'settings', 'business'));
+    if (docSnap.exists()) {
+      return { ...DEFAULT_SETTINGS, ...(docSnap.data() as BusinessSettings) };
+    }
+    const rtdbSnap = await get(ref(rtdb, 'settings/business'));
+    if (rtdbSnap.exists()) {
+      return { ...DEFAULT_SETTINGS, ...rtdbSnap.val() };
+    }
+    return DEFAULT_SETTINGS;
   } catch (error) {
     return DEFAULT_SETTINGS;
   }
