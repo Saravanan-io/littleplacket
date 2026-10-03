@@ -1,9 +1,6 @@
-'use client';
-
 import React, { useState } from 'react';
 import Navbar from './Navbar';
 import BottomNavigation from './BottomNavigation';
-import WhatsAppFloatingButton from './WhatsAppFloatingButton';
 import EnquiryDrawer from './EnquiryDrawer';
 import { BusinessSettings } from '../types';
 
@@ -25,14 +22,8 @@ export default function ClientShell({ settings, children }: ClientShellProps) {
 
       <main className="flex-grow relative z-10">{children}</main>
 
-      {/* Floating WhatsApp Button */}
-      <WhatsAppFloatingButton
-        whatsappNumber={settings.whatsappNumber}
-        businessName={settings.businessName}
-      />
-
       {/* Mobile Sticky Bottom Navigation */}
-      <BottomNavigation onOpenEnquiry={() => setEnquiryDrawerOpen(true)} />
+      <BottomNavigation />
 
       {/* Global Slide-Over Enquiry Drawer */}
       <EnquiryDrawer

@@ -58,10 +58,10 @@ export default function HomeClient({
   return (
     <div className="space-y-6 sm:space-y-10 pb-28 lg:pb-16">
       {/* 1. HERO SECTION */}
-      <Hero settings={settings} whatsappNumber={whatsappNumber} />
+      <Hero />
 
       {/* 2. BOYS & GIRLS CATEGORY CARDS + QUICK TAGS */}
-      <CategoryCards settings={settings} />
+      <CategoryCards />
 
       {/* 3. FEATURED PRODUCTS SHOWCASE */}
       <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-4 space-y-6">

@@ -1,3 +1,4 @@
+import { useWindowDimensions } from '../hooks/useWindowDimensions';
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -7,7 +8,6 @@ import {
   ScrollView,
   ActivityIndicator,
   Image,
-  useWindowDimensions,
 } from 'react-native';
 import {
   Shirt,
@@ -40,6 +40,7 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
     featured: 0,
   });
   const [recentProducts, setRecentProducts] = useState<Product[]>([]);
+  const [settings, setSettings] = useState<any>(null);
 
   const loadData = async () => {
     try {
@@ -146,82 +147,14 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
           <Text style={styles.kpiLabel}>Girls Outfits Collection</Text>
         </View>
       </View>
-
-      {/* Recent Outfits Table */}
-      <View style={styles.recentSection}>
-        <View style={styles.recentHeader}>
-          <View>
-            <Text style={styles.sectionTitle}>Recently Added Outfits</Text>
-            <Text style={styles.sectionSubtitle}>Quick edit and stock review for recently added items</Text>
-          </View>
-          <TouchableOpacity
-            style={styles.viewAllBtn}
-            onPress={() => onNavigate('products')}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.viewAllText}>View All Outfits</Text>
-            <ArrowRight size={14} color="#2563EB" strokeWidth={2.2} />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.tableCard}>
-          {recentProducts.map((product) => {
-            const isBoys = product.category === 'boys';
-            return (
-              <View key={product.id || product.slug} style={styles.productRow}>
-                <Image
-                  source={{ uri: product.images?.[0]?.url || '/images/hero-banner.jpg' }}
-                  style={styles.productThumb}
-                />
-                <View style={styles.productInfo}>
-                  <Text style={styles.productName}>{product.name}</Text>
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginTop: 4 }}>
-                    <View
-                      style={[
-                        styles.catBadge,
-                        isBoys ? styles.catBadgeBoys : styles.catBadgeGirls,
-                      ]}
-                    >
-                      {isBoys ? (
-                        <Baby size={11} color="#1D4ED8" strokeWidth={2} />
-                      ) : (
-                        <Heart size={11} color="#BE185D" strokeWidth={2} />
-                      )}
-                      <Text
-                        style={[
-                          styles.catBadgeText,
-                          isBoys ? { color: '#1D4ED8' } : { color: '#BE185D' },
-                        ]}
-                      >
-                        {isBoys ? 'Boys Outfit' : 'Girls Outfit'}
-                      </Text>
-                    </View>
-
-                    <Text style={styles.priceTag}>₹{product.price}</Text>
-
-                    {product.availability === 'out_of_stock' ? (
-                      <View style={styles.outStockBadge}>
-                        <Text style={styles.outStockText}>Out of Stock</Text>
-                      </View>
-                    ) : (
-                      <View style={styles.inStockBadge}>
-                        <Text style={styles.inStockText}>In Stock</Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
-
-                <TouchableOpacity
-                  style={styles.editBtn}
-                  onPress={() => onNavigate('product-edit', { productId: product.id })}
-                  activeOpacity={0.8}
-                >
-                  <Pencil size={14} color="#334155" strokeWidth={2} />
-                  <Text style={styles.editBtnText}>Edit</Text>
-                </TouchableOpacity>
-              </View>
-            );
-          })}
+      {/* Welcome Admin Banner Card */}
+      <View style={styles.welcomeBannerSection}>
+        <View style={[styles.welcomeBannerCard, isMobile && styles.welcomeBannerCardMobile]}>
+          <Image
+            source={{ uri: '/images/welcome-admin.png' }}
+            style={styles.welcomeBannerImg}
+            resizeMode="contain"
+          />
         </View>
       </View>
     </ScrollView>
@@ -229,6 +162,27 @@ export default function DashboardScreen({ onNavigate }: DashboardScreenProps) {
 }
 
 const styles = StyleSheet.create({
+  welcomeBannerSection: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 8,
+  },
+  welcomeBannerCard: {
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+  },
+  welcomeBannerCardMobile: {
+    paddingVertical: 4,
+  },
+  welcomeBannerImg: {
+    width: '100%',
+    height: 380,
+  },
+  
+
   container: {
     flex: 1,
     backgroundColor: '#F8FAFC',

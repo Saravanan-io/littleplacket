@@ -1,3 +1,4 @@
+import { useWindowDimensions } from '../hooks/useWindowDimensions';
 import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
@@ -8,7 +9,6 @@ import {
   TextInput,
   ActivityIndicator,
   Image,
-  useWindowDimensions,
 } from 'react-native';
 import {
   Camera,

@@ -1,5 +1,6 @@
+import { useWindowDimensions } from '../hooks/useWindowDimensions';
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import {
   LayoutDashboard,
   Shirt,

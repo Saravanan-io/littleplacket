@@ -10,16 +10,16 @@ interface CategoryCardsProps {
   settings?: BusinessSettings;
 }
 
-export default function CategoryCards({ settings }: CategoryCardsProps) {
-  const boysTitle = settings?.boysCardTitle || 'BOYS';
-  const boysSubtitle = settings?.boysCardSubtitle || 'Collection';
-  const boysDesc = settings?.boysCardDescription || 'Trendy outfits for every occasion';
-  const boysImage = settings?.boysCardImage || '/images/products/boy-check-shirt.jpg';
+export default function CategoryCards() {
+  const boysTitle = 'BOYS';
+  const boysSubtitle = 'Collection';
+  const boysDesc = 'Trendy outfits for every occasion';
+  const boysImage = '/images/products/boy-check-shirt.jpg';
 
-  const girlsTitle = settings?.girlsCardTitle || 'GIRLS';
-  const girlsSubtitle = settings?.girlsCardSubtitle || 'Collection';
-  const girlsDesc = settings?.girlsCardDescription || 'Pretty outfits for every little star';
-  const girlsImage = settings?.girlsCardImage || '/images/products/girl-floral-bow-frock.jpg';
+  const girlsTitle = 'GIRLS';
+  const girlsSubtitle = 'Collection';
+  const girlsDesc = 'Pretty outfits for every little star';
+  const girlsImage = '/images/products/girl-floral-bow-frock.jpg';
 
   return (
     <section className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6">

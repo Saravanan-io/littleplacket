@@ -1,3 +1,4 @@
+import { useWindowDimensions } from '../hooks/useWindowDimensions';
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -8,7 +9,6 @@ import {
   TextInput,
   Image,
   ActivityIndicator,
-  useWindowDimensions,
 } from 'react-native';
 import {
   PlusCircle,

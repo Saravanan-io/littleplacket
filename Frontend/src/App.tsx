@@ -58,7 +58,6 @@ export default function App() {
         </Routes>
         <Footer
           whatsappNumber={settings.whatsappNumber}
-          email={settings.email}
           phone={settings.phone}
           address={settings.address}
         />

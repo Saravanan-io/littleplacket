@@ -30,7 +30,8 @@ export default function ProductDetailPage() {
           const rel = allProds
             .filter(
               (p) =>
-                p.slug !== prod.slug &&
+                p.id !== prod.id &&
+                (p.slug || p.id) !== (prod.slug || prod.id) &&
                 (p.category === prod.category || p.collection === prod.collection)
             )
             .slice(0, 4);

@@ -1,3 +1,4 @@
+import { useWindowDimensions } from '../hooks/useWindowDimensions';
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -7,7 +8,6 @@ import {
   ScrollView,
   TextInput,
   ActivityIndicator,
-  useWindowDimensions,
 } from 'react-native';
 import { MessageCircle, Check, ExternalLink, MapPin, Phone } from 'lucide-react';
 import { api } from '../services/api';

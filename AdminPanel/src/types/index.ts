@@ -66,44 +66,15 @@ export interface Collection {
 }
 
 export interface BusinessSettings {
-  businessName: string;
-  tagline?: string;
-  whatsappNumber: string;
-  email: string;
-  phone: string;
-  instagramUrl: string;
-  facebookUrl: string;
   address: string;
-  logoUrl?: string;
-  faviconUrl?: string;
-  heroHeadlineLittle?: string;
-  heroHeadlineStyles?: string;
-  heroHeadlineBigSmiles?: string;
-  heroSupportingText?: string;
-  heroImage?: string;
-  heroImages?: string[];
-  boysCardTitle?: string;
-  boysCardSubtitle?: string;
-  boysCardDescription?: string;
-  boysCardImage?: string;
-  girlsCardTitle?: string;
-  girlsCardSubtitle?: string;
-  girlsCardDescription?: string;
-  girlsCardImage?: string;
-  quickCard1Title?: string;
-  quickCard1Desc?: string;
-  quickCard2Title?: string;
-  quickCard2Desc?: string;
-  quickCard3Title?: string;
-  quickCard3Desc?: string;
-  announcementText?: string;
-  homepageContent?: string;
-  footerContent?: string;
+  whatsappNumber: string;
+  phone: string;
   updatedAt?: string;
 }
 
 export interface AdminUser {
-  _id: string;
+  id?: string;
+  _id?: string;
   email: string;
   name: string;
   role: string;

@@ -4,35 +4,9 @@ import { db, rtdb } from './firebase';
 import { Product, AgeOption, Collection, BusinessSettings } from '../types';
 
 export const DEFAULT_SETTINGS: BusinessSettings = {
-  businessName: 'THE LITTLE PLACKET',
-  tagline: 'LITTLE OUTFITS FOR BIG ADVENTURES',
-  heroHeadlineLittle: 'The',
-  heroHeadlineStyles: 'Little',
-  heroHeadlineBigSmiles: 'Placket',
-  heroSupportingText: 'Little outfits for big adventures.',
-  heroImage: '',
-  boysCardTitle: 'BOYS',
-  boysCardSubtitle: 'Collection',
-  boysCardDescription: 'Trendy outfits for every occasion',
-  boysCardImage: '',
-  girlsCardTitle: 'GIRLS',
-  girlsCardSubtitle: 'Collection',
-  girlsCardDescription: 'Pretty outfits for every little star',
-  girlsCardImage: '',
-  quickCard1Title: 'NEW ARRIVALS',
-  quickCard1Desc: 'Fresh 2026 Styles',
-  quickCard2Title: 'BEST SELLERS',
-  quickCard2Desc: 'Loved by Parents',
-  quickCard3Title: 'OFFERS',
-  quickCard3Desc: 'Special Boutique Bundles',
-  whatsappNumber: '919876543210',
-  email: 'hello@thelittleplacket.com',
-  phone: '+91 98765 43210',
-  instagramUrl: 'https://instagram.com/thelittleplacket',
-  facebookUrl: 'https://facebook.com/thelittleplacket',
   address: 'Shop 14, Lilac Arcade, Blossom Street, Bandra West, Mumbai 400050',
-  announcementText: '✨ Exclusive Catalogue Platform — Handcrafted Kids & Baby Outfits — Direct WhatsApp Assistance',
-  footerContent: '© 2026 THE LITTLE PLACKET. Little Outfits for Big Adventures. All rights reserved.',
+  whatsappNumber: '919876543210',
+  phone: '+91 98765 43210',
 };
 
 /**
@@ -139,7 +113,16 @@ export async function fetchProducts(filters: Record<string, any> = {}): Promise<
 export async function fetchProductBySlug(slug: string): Promise<Product | null> {
   try {
     const products = await fetchProducts();
-    return products.find((p) => p.slug === slug || p.id === slug) || null;
+    const cleanSlug = decodeURIComponent(slug).toLowerCase();
+    return (
+      products.find((p) => {
+        if (!p) return false;
+        const pSlug = p.slug?.toLowerCase();
+        const pId = p.id?.toLowerCase();
+        const nameSlug = p.name ? p.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') : '';
+        return pSlug === cleanSlug || pId === cleanSlug || nameSlug === cleanSlug;
+      }) || null
+    );
   } catch (error) {
     return null;
   }

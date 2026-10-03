@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageCircle, Heart, MapPin, Mail, Phone } from 'lucide-react';
+import { MessageCircle, Heart, MapPin, Phone } from 'lucide-react';
 import { formatWhatsAppNumber } from '../lib/whatsapp';
 
 interface FooterProps {
@@ -11,7 +11,6 @@ interface FooterProps {
 
 export default function Footer({
   whatsappNumber = '919876543210',
-  email = 'hello@thelittleplacket.com',
   phone = '+91 98765 43210',
   address = 'Shop 14, Lilac Arcade, Blossom Street, Bandra West, Mumbai 400050',
 }: FooterProps) {
@@ -56,12 +55,6 @@ export default function Footer({
                   className="text-xs sm:text-sm font-semibold text-[#25D366] hover:underline"
                 >
                   WhatsApp: +{cleanPhone}
-                </a>
-              </li>
-              <li className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-purple-500 shrink-0" />
-                <a href={`mailto:${email}`} className="hover:text-charcoal-900 text-xs sm:text-sm">
-                  {email}
                 </a>
               </li>
             </ul>

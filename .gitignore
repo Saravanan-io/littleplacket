@@ -29,3 +29,5 @@ yarn-error.log*
 *.pem
 .vscode/
 .idea/
+.firebase/
+

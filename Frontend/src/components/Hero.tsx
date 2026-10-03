@@ -13,13 +13,12 @@ interface HeroProps {
   whatsappNumber?: string;
 }
 
-export default function Hero({ settings, whatsappNumber = '919876543210' }: HeroProps) {
-  const littleWord = settings?.heroHeadlineLittle || 'The';
-  const stylesWord = settings?.heroHeadlineStyles || 'Little';
-  const bigSmilesWord = settings?.heroHeadlineBigSmiles || 'Placket';
-  const supportingText =
-    settings?.heroSupportingText || 'Little outfits for big adventures.';
-  const heroImg = settings?.heroImage || '/images/the-little-placket-banner.png';
+export default function Hero() {
+  const littleWord = 'The';
+  const stylesWord = 'Little';
+  const bigSmilesWord = 'Placket';
+  const supportingText = 'Little outfits for big adventures.';
+  const heroImg = '/images/the-little-placket-banner.png';
 
   return (
     <section className="relative overflow-hidden pt-6 pb-6 sm:pt-10 sm:pb-10">

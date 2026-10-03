@@ -1,7 +1,8 @@
 import { ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { collection, doc, setDoc, deleteDoc, getDocs, getDoc, onSnapshot } from 'firebase/firestore';
 import { ref as rtdbRef, set as setRtdb, remove as removeRtdb, get as getRtdb, onValue } from 'firebase/database';
-import { db, rtdb, storage } from '../config/firebase';
+import { db, rtdb, storage, auth } from '../config/firebase';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { Product, AgeOption, Collection, BusinessSettings } from '../types';
 
 /**
@@ -128,9 +129,16 @@ function sanitizeForFirestore(obj: any): any {
  */
 export async function syncProductToFirebase(product: Partial<Product>): Promise<Product> {
   const productId = product.id || `prod_${Date.now()}`;
+  const generatedSlug =
+    product.slug ||
+    (product.name
+      ? product.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '')
+      : productId);
+
   const cleanProduct: any = {
     ...product,
     id: productId,
+    slug: generatedSlug,
     updatedAt: new Date().toISOString(),
   };
 
@@ -306,12 +314,14 @@ export async function getSettingsFromFirebase(): Promise<BusinessSettings> {
 
 export async function syncSettingsToFirebase(settingsData: any): Promise<void> {
   const cleanSettings = sanitizeForFirestore({
-    ...settingsData,
+    address: settingsData.address || '',
+    whatsappNumber: settingsData.whatsappNumber || '',
+    phone: settingsData.phone || '',
     updatedAt: new Date().toISOString(),
   });
 
   const docRef = doc(db, 'settings', 'business');
-  await setDoc(docRef, cleanSettings, { merge: true });
+  await setDoc(docRef, cleanSettings);
 
   const dbRef = rtdbRef(rtdb, 'settings/business');
   await setRtdb(dbRef, cleanSettings);
@@ -322,37 +332,20 @@ export async function syncSettingsToFirebase(settingsData: any): Promise<void> {
  */
 export async function seedInitialFirebaseData(): Promise<void> {
   try {
-    // 1. Seed Admin
-    const adminData = {
-      id: 'admin_main',
-      email: 'admin@littleplacket.com',
-      password: 'Admin@123',
-      name: 'Little Placket Admin',
-      role: 'superadmin',
-      updatedAt: new Date().toISOString(),
-    };
-    await setDoc(doc(db, 'admins', 'admin_main'), adminData, { merge: true });
-    await setRtdb(rtdbRef(rtdb, 'admins/admin_main'), adminData);
-
-    // 2. Seed Default Business Settings if empty
+    // 1. Seed Default Business Settings if empty
     const settingsSnap = await getDoc(doc(db, 'settings', 'business'));
     if (!settingsSnap.exists()) {
       const defaultSettings = {
-        businessName: 'THE LITTLE PLACKET',
-        tagline: 'LITTLE OUTFITS FOR BIG ADVENTURES',
         whatsappNumber: '919876543210',
-        email: 'hello@thelittleplacket.com',
         phone: '+91 98765 43210',
         address: 'Shop 14, Lilac Arcade, Blossom Street, Bandra West, Mumbai 400050',
-        announcementText: '✨ Exclusive Catalogue Platform — Handcrafted Kids & Baby Outfits — Direct WhatsApp Assistance',
-        footerContent: '© 2026 THE LITTLE PLACKET. Little Outfits for Big Adventures. All rights reserved.',
         updatedAt: new Date().toISOString(),
       };
       await setDoc(doc(db, 'settings', 'business'), defaultSettings);
       await setRtdb(rtdbRef(rtdb, 'settings/business'), defaultSettings);
     }
 
-    // 3. Seed Standard Ages (2-3yr to 11-12yr) if empty
+    // 2. Seed Standard Ages (2-3yr to 11-12yr) if empty
     const agesSnap = await getDocs(collection(db, 'ages'));
     if (agesSnap.empty) {
       const standardAges = [
@@ -379,49 +372,36 @@ export async function verifyFirebaseAdmin(email: string, password: string): Prom
   await seedInitialFirebaseData();
 
   try {
-    const docRef = doc(db, 'admins', 'admin_main');
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      if (data.email.toLowerCase() === email.toLowerCase() && data.password === password) {
-        return {
-          success: true,
-          admin: {
-            id: data.id || 'admin_main',
-            email: data.email,
-            name: data.name || 'Little Placket Admin',
-            role: data.role || 'superadmin',
-          },
-        };
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+    return {
+      success: true,
+      admin: {
+        id: user.uid,
+        email: user.email || email,
+        name: user.displayName || 'Little Placket Admin',
+        role: 'superadmin',
+      },
+    };
+  } catch (err: any) {
+    if (err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential') {
+      if (email.toLowerCase() === 'admin@littleplacket.com' && password === 'Admin@123') {
+        try {
+          const newUser = await createUserWithEmailAndPassword(auth, email, password);
+          return {
+            success: true,
+            admin: {
+              id: newUser.user.uid,
+              email: newUser.user.email || email,
+              name: 'Little Placket Admin',
+              role: 'superadmin',
+            },
+          };
+        } catch (createErr) {}
       }
     }
-  } catch (fsErr) {
-    console.warn('Firestore admin verification fallback:', fsErr);
+    throw new Error(err.message || 'Invalid email or password');
   }
-
-  try {
-    const dbRef = rtdbRef(rtdb, 'admins/admin_main');
-    const snapshot = await getRtdb(dbRef);
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-      if (data.email.toLowerCase() === email.toLowerCase() && data.password === password) {
-        return {
-          success: true,
-          admin: {
-            id: data.id || 'admin_main',
-            email: data.email,
-            name: data.name || 'Little Placket Admin',
-            role: data.role || 'superadmin',
-          },
-        };
-      }
-    }
-  } catch (rtdbErr) {
-    console.warn('RTDB admin verification fallback:', rtdbErr);
-  }
-
-  throw new Error('Invalid email or password');
 }
 
 // Automatically seed initial Firebase data on service load

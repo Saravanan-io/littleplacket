@@ -18,7 +18,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <Link
-      href={`/product/${product.slug}`}
+      href={`/product/${product.slug || product.id}`}
       className="group flex flex-col bg-white rounded-3xl p-2.5 sm:p-3 border border-cream-200/90 shadow-soft hover:shadow-soft-lg hover:border-purple-200/70 transition-all duration-300 relative select-none"
     >
       {/* Product Image Container */}

@@ -1,5 +1,6 @@
+import { useWindowDimensions } from './hooks/useWindowDimensions';
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { api } from './services/api';
 import { AdminUser, ScreenName } from './types';
 
